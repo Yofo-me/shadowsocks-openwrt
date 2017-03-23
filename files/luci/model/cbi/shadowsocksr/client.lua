@@ -226,6 +226,7 @@ s:tab("wan_ac", translate("Interfaces - WAN"))
 
 o = s:taboption("wan_ac", Value, "wan_bp_list", translate("Bypassed IP List"))
 o:value("/dev/null", translate("NULL - As Global Proxy"))
+o:value("/etc/chinadns_chnroute.txt", translate("国内路由表"))
 
 o.default = "/dev/null"
 o.rmempty = false
