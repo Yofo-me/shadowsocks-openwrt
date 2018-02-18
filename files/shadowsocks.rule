@@ -9,18 +9,18 @@
 
 TAG="_SS_SPEC_RULE_"   # comment tag
 IPT="iptables -t nat"  # alias of iptables
-FWI=$(uci get firewall.shadowsocksr.path 2>/dev/null)  # firewall include file
+FWI=$(uci get firewall.shadowsocks.path 2>/dev/null)  # firewall include file
 
 usage() {
 	cat <<-EOF
-		Usage: ssr-rules [options]
+		Usage: ss-rules [options]
 
 		Valid options are:
 
-		    -s <server_ip>          ip address of shadowsocksr remote server
-		    -l <local_port>         port number of shadowsocksr local server
-		    -S <server_ip>          ip address of shadowsocksr remote UDP server
-		    -L <local_port>         port number of shadowsocksr local UDP server
+		    -s <server_ip>          ip address of shadowsocks remote server
+		    -l <local_port>         port number of shadowsocks local server
+		    -S <server_ip>          ip address of shadowsocks remote UDP server
+		    -L <local_port>         port number of shadowsocks local UDP server
 		    -i <ip_list_file>       a file content is bypassed ip list
 		    -a <lan_ips>            lan ip of access control, need a prefix to
 		                            define access control mode
@@ -41,7 +41,7 @@ EOF
 
 loger() {
 	# 1.alert 2.crit 3.err 4.warn 5.notice 6.info 7.debug
-	logger -st ssr-rules[$$] -p$1 $2
+	logger -st ss-rules[$$] -p$1 $2
 }
 
 flush_r() {

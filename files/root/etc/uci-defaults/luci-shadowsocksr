@@ -1,9 +1,9 @@
 #!/bin/sh
 
 uci -q batch <<-EOF >/dev/null
-	delete ucitrack.@shadowsocksr[-1]
-	add ucitrack shadowsocksr
-	set ucitrack.@shadowsocksr[-1].init=shadowsocksr
+	delete ucitrack.@shadowsocks[-1]
+	add ucitrack shadowsocks
+	set ucitrack.@shadowsocks[-1].init=shadowsocks
 	commit ucitrack
 EOF
 
