@@ -3,7 +3,7 @@
 		function check_port(btn) {
 			btn.disabled = true;
 			btn.value = '<%:Check...%>';
-			XHR.get('<%=luci.dispatcher.build_url("admin", "services", "shadowsocksr","checkport")%>',
+			XHR.get('<%=luci.dispatcher.build_url("admin", "services", "shadowsocks","checkport")%>',
 				null,
 				function (x, rv) {
 					var s = document.getElementById('<%=self.option%>-status');

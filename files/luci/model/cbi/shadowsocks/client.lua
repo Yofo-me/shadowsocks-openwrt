@@ -12,7 +12,7 @@ local gfwmode = 0
 
 local pdnsd_flag = 0
 
-if nixio.fs.access("/etc/dnsmasq.ssr/gfw_list.conf") then
+if nixio.fs.access("/etc/dnsmasq.shadowsocks/gfw_list.conf") then
 	gfwmode = 1
 end
 
@@ -213,7 +213,7 @@ s:tab("wan_ac", translate("Interfaces - WAN"))
 
 o = s:taboption("wan_ac", Value, "wan_bp_list", translate("Bypassed IP List"))
 o:value("/dev/null", translate("NULL - As Global Proxy"))
-o:value("/etc/chinadns_chnroute.txt", translate("国内路由表"))
+o:value("/etc/chnroute.txt", translate("ChnRoute"))
 
 o.default = "/dev/null"
 o.rmempty = false

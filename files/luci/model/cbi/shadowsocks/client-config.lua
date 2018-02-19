@@ -119,20 +119,20 @@ o = s:option(Value, "obfs_param", translate("Obfs param(optional)"))
 o = s:option(Flag, "fast_open", translate("TCP Fast Open"))
 o.rmempty = false
 
-kcp_enable = s:option(Flag, "kcp_enable", translate("KcpTun Enable"), translate("bin:/usr/bin/ssr-kcptun"))
+kcp_enable = s:option(Flag, "kcp_enable", translate("KcpTun Enable"), translate("bin:/usr/bin/ss-kcptun"))
 kcp_enable.rmempty = false
 
 o = s:option(Value, "kcp_port", translate("KcpTun Port"))
 o.datatype = "port"
 o.default = 4000
 function o.validate(self, value, section)
-	local kcp_file = "/usr/bin/ssr-kcptun"
+	local kcp_file = "/usr/bin/ss-kcptun"
 	local enable = kcp_enable:formvalue(section) or kcp_enable.disabled
 	if enable == kcp_enable.enabled then
 		if not fs.access(kcp_file) then
-			return nil, translate("/usr/bin/ssr-kcptun not found")
+			return nil, translate("/usr/bin/ss-kcptun not found")
 		elseif not isKcptun(kcp_file) then
-			return nil, translate("/usr/bin/ssr-kcptun is not a Kcptun executable file")
+			return nil, translate("/usr/bin/ss-kcptun is not a Kcptun executable file")
 		end
 	end
 

@@ -178,7 +178,7 @@ define Package/luci-app-shadowsocks-Client/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/shadowsocks.config $(1)/etc/config/shadowsocks
 	$(INSTALL_DIR) $(1)/etc
-	$(INSTALL_DATA) ./files/china_ssr.txt $(1)/etc/china_ssr.txt	
+	$(INSTALL_DATA) ./files/chnroute.txt $(1)/etc/chnroute.txt	
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
 endef
@@ -221,8 +221,8 @@ define Package/luci-app-shadowsocks-GFW/install
 	$(INSTALL_BIN) ./files/shadowsocks.monitor $(1)/usr/bin/ss-monitor
 	$(INSTALL_BIN) ./files/shadowsocks.gfw $(1)/usr/bin/ss-gfw
 	$(INSTALL_BIN) ./files/shadowsocks.switch $(1)/usr/bin/ss-switch
-	$(INSTALL_DIR) $(1)/etc/dnsmasq.ssr
-	$(INSTALL_DATA) ./files/gfw_list.conf $(1)/etc/dnsmasq.ssr/gfw_list.conf
+	$(INSTALL_DIR) $(1)/etc/dnsmasq.shadowsocks
+	$(INSTALL_DATA) ./files/gfw_list.conf $(1)/etc/dnsmasq.shadowsocks/gfw_list.conf
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/shadowsocks.config $(1)/etc/config/shadowsocks
 	$(INSTALL_DIR) $(1)/etc

@@ -44,19 +44,15 @@ function refresh_data()
     local icount = 0
 
     if set == "gfw_data" then
-        if nixio.fs.access("/usr/bin/wget-ssl") then
-            refresh_cmd = "wget-ssl --no-check-certificate https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt -O /tmp/gfw.b64"
-        else
-            refresh_cmd = "wget -O /tmp/gfw.b64 http://iytc.net/tools/list.b64"
-        end
+        refresh_cmd = "curl https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt > /tmp/gfw.b64"
         sret = luci.sys.call(refresh_cmd .. " 2>/dev/null")
         if sret == 0 then
             luci.sys.call("/usr/bin/ss-gfw")
             icount = luci.sys.exec("cat /tmp/gfwnew.txt | wc -l")
             if tonumber(icount) > 1000 then
-                oldcount = luci.sys.exec("cat /etc/dnsmasq.ss/gfw_list.conf | wc -l")
+                oldcount = luci.sys.exec("cat /etc/dnsmasq.shadowsocks/gfw_list.conf | wc -l")
                 if tonumber(icount) ~= tonumber(oldcount) then
-                    luci.sys.exec("cp -f /tmp/gfwnew.txt /etc/dnsmasq.ss/gfw_list.conf")
+                    luci.sys.exec("cp -f /tmp/gfwnew.txt /etc/dnsmasq.shadowsocks/gfw_list.conf")
                     retstring = tostring(math.ceil(tonumber(icount) / 2))
                 else
                     retstring = "0"
@@ -69,14 +65,13 @@ function refresh_data()
             retstring = "-1"
         end
     elseif set == "ip_data" then
-        refresh_cmd =
-            'wget -O- \'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest\'  2>/dev/null| awk -F\\| \'/CN\\|ipv4/ { printf("%s/%d\\n", $4, 32-log($5)/log(2)) }\' > /tmp/china_ss.txt'
+        refresh_cmd = 'curl \'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest\'| awk -F\\| \'/CN\\|ipv4/ { printf("%s/%d\\n", $4, 32-log($5)/log(2)) }\' > /tmp/chnroute.txt'
         sret = luci.sys.call(refresh_cmd)
-        icount = luci.sys.exec("cat /tmp/china_ss.txt | wc -l")
+        icount = luci.sys.exec("cat /tmp/chnroute.txt | wc -l")
         if sret == 0 and tonumber(icount) > 1000 then
-            oldcount = luci.sys.exec("cat /etc/china_ss.txt | wc -l")
+            oldcount = luci.sys.exec("cat /etc/chnroute.txt | wc -l")
             if tonumber(icount) ~= tonumber(oldcount) then
-                luci.sys.exec("cp -f /tmp/china_ss.txt /etc/china_ss.txt")
+                luci.sys.exec("cp -f /tmp/chnroute.txt /etc/chnroute.txt")
                 retstring = tostring(tonumber(icount))
             else
                 retstring = "0"
@@ -84,26 +79,21 @@ function refresh_data()
         else
             retstring = "-1"
         end
-        luci.sys.exec("rm -f /tmp/china_ss.txt ")
+        luci.sys.exec("rm -f /tmp/chnroute.txt ")
     else
-        if nixio.fs.access("/usr/bin/wget-ssl") then
-            refresh_cmd =
-                "wget --no-check-certificate -O - https://easylist-downloads.adblockplus.org/easylistchina+easylist.txt | grep ^\\|\\|[^\\*]*\\^$ | sed -e 's:||:address\\=\\/:' -e 's:\\^:/127\\.0\\.0\\.1:' > /tmp/ad.conf"
-        else
-            refresh_cmd = "wget -O /tmp/ad.conf http://iytc.net/tools/ad.conf"
-        end
+        refresh_cmd = "curl https://easylist-downloads.adblockplus.org/easylistchina+easylist.txt | grep ^\\|\\|[^\\*]*\\^$ | sed -e 's:||:address\\=\\/:' -e 's:\\^:/127\\.0\\.0\\.1:' > /tmp/ad.conf"
         sret = luci.sys.call(refresh_cmd .. " 2>/dev/null")
         if sret == 0 then
             icount = luci.sys.exec("cat /tmp/ad.conf | wc -l")
             if tonumber(icount) > 1000 then
-                if nixio.fs.access("/etc/dnsmasq.ss/ad.conf") then
-                    oldcount = luci.sys.exec("cat /etc/dnsmasq.ss/ad.conf | wc -l")
+                if nixio.fs.access("/etc/dnsmasq.shadowsocks/ad.conf") then
+                    oldcount = luci.sys.exec("cat /etc/dnsmasq.shadowsocks/ad.conf | wc -l")
                 else
                     oldcount = 0
                 end
 
                 if tonumber(icount) ~= tonumber(oldcount) then
-                    luci.sys.exec("cp -f /tmp/ad.conf /etc/dnsmasq.ss/ad.conf")
+                    luci.sys.exec("cp -f /tmp/ad.conf /etc/dnsmasq.shadowsocks/ad.conf")
                     retstring = tostring(math.ceil(tonumber(icount)))
                     if oldcount == 0 then
                         luci.sys.call("/etc/init.d/dnsmasq restart")
