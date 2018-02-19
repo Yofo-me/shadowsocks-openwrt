@@ -194,7 +194,7 @@ define Package/luci-app-shadowsocks-openwrt-Server/install
 	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-server $(1)/usr/bin/ss-server		
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rule $(1)/usr/bin/ss-rules
+	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rules $(1)/usr/bin/ss-rules
 	$(INSTALL_BIN) ./files/shadowsocks-openwrt.monitor $(1)/usr/bin/ss-monitor
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/shadowsocks-openwrt.config $(1)/etc/config/shadowsocks-openwrt
@@ -217,7 +217,7 @@ define Package/luci-app-shadowsocks-openwrt-GFW/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-local $(1)/usr/bin/ss-local	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-server $(1)/usr/bin/ss-server		
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-check $(1)/usr/bin/ss-check
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rule $(1)/usr/bin/ss-rules
+	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rules $(1)/usr/bin/ss-rules
 	$(INSTALL_BIN) ./files/shadowsocks-openwrt.monitor $(1)/usr/bin/ss-monitor
 	$(INSTALL_BIN) ./files/shadowsocks-openwrt.gfw $(1)/usr/bin/ss-gfw
 	$(INSTALL_BIN) ./files/shadowsocks-openwrt.switch $(1)/usr/bin/ss-switch
