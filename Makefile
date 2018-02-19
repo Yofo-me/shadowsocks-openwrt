@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2017 shadowsocks-openwrt
+# Copyright (C) 2017 shadowsocks
 # Copyright (C) 2017 yushi studio <ywb94@qq.com>
 #
 # This is free software, licensed under the GNU General Public License v3.
@@ -8,7 +8,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=shadowsocks-openwrt
+PKG_NAME:=shadowsocks
 PKG_VERSION:=1.0.0
 #PKG_RELEASE:=1
 
@@ -33,42 +33,42 @@ PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/shadowsocks-openwrt/Default
+define Package/shadowsocks/Default
 	SECTION:=luci
 	CATEGORY:=LuCI
 	SUBMENU:=3. Applications
-	TITLE:=shadowsocks-openwrt-libev LuCI interface
-	URL:=https://github.com/ywb94/shadowsocks-openwrt
+	TITLE:=shadowsocks-libev LuCI interface
+	URL:=https://github.com/ywb94/shadowsocks
 	VARIANT:=$(1)
 	DEPENDS:=$(3)	
 	PKGARCH:=all
 endef
 
 
-Package/luci-app-shadowsocks-openwrt = $(call Package/shadowsocks-openwrt/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +libsodium +libcares +libev)
-Package/luci-app-shadowsocks-openwrt-Client = $(call Package/shadowsocks-openwrt/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +libsodium +libcares +libev)
-Package/luci-app-shadowsocks-openwrt-Server = $(call Package/shadowsocks-openwrt/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +libsodium +libcares +libev)
-Package/luci-app-shadowsocks-openwrt-GFW = $(call Package/shadowsocks-openwrt/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +dnsmasq-full +libsodium +libcares +libev)
+Package/luci-app-shadowsocks = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +libsodium +libcares +libev)
+Package/luci-app-shadowsocks-Client = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +libsodium +libcares +libev)
+Package/luci-app-shadowsocks-Server = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +libsodium +libcares +libev)
+Package/luci-app-shadowsocks-GFW = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +dnsmasq-full +libsodium +libcares +libev)
 
-define Package/shadowsocks-openwrt/description
+define Package/shadowsocks/description
 	LuCI Support for $(1).
 endef
 
-Package/luci-app-shadowsocks-openwrt/description = $(call Package/shadowsocks-openwrt/description,shadowsocks-openwrt-libev Client and Server)
-Package/luci-app-shadowsocks-openwrt-Client/description = $(call Package/shadowsocks-openwrt/description,shadowsocks-openwrt-libev Client)
-Package/luci-app-shadowsocks-openwrt-Server/description = $(call Package/shadowsocks-openwrt/description,shadowsocks-openwrt-libev Server)
-Package/luci-app-shadowsocks-openwrt-GFW/description = $(call Package/shadowsocks-openwrt/description,shadowsocks-openwrt-libev GFW)
+Package/luci-app-shadowsocks/description = $(call Package/shadowsocks/description,shadowsocks-libev Client and Server)
+Package/luci-app-shadowsocks-Client/description = $(call Package/shadowsocks/description,shadowsocks-libev Client)
+Package/luci-app-shadowsocks-Server/description = $(call Package/shadowsocks/description,shadowsocks-libev Server)
+Package/luci-app-shadowsocks-GFW/description = $(call Package/shadowsocks/description,shadowsocks-libev GFW)
 
-define Package/shadowsocks-openwrt/prerm
+define Package/shadowsocks/prerm
 #!/bin/sh
 # check if we are on real system
 if [ -z "$${IPKG_INSTROOT}" ]; then
-    echo "Removing rc.d symlink for shadowsocks-openwrt"
-    /etc/init.d/shadowsocks-openwrt disable
-    /etc/init.d/shadowsocks-openwrt stop
-    echo "Removing firewall rule for shadowsocks-openwrt"
+    echo "Removing rc.d symlink for shadowsocks"
+    /etc/init.d/shadowsocks disable
+    /etc/init.d/shadowsocks stop
+    echo "Removing firewall rule for shadowsocks"
 	uci -q batch <<-EOF >/dev/null
-		delete firewall.shadowsocks-openwrt
+		delete firewall.shadowsocks
 		commit firewall
 EOF
 	if [ "$(1)" = "GFW" ]; then
@@ -79,63 +79,63 @@ fi
 exit 0
 endef
 
-Package/luci-app-shadowsocks-openwrt/prerm = $(call Package/shadowsocks-openwrt/prerm,shadowsocks-openwrt)
-Package/luci-app-shadowsocks-openwrt-Client/prerm = $(call Package/shadowsocks-openwrt/prerm,shadowsocks-openwrt)
-Package/luci-app-shadowsocks-openwrt-GFW/prerm = $(call Package/shadowsocks-openwrt/prerm,GFW)
+Package/luci-app-shadowsocks/prerm = $(call Package/shadowsocks/prerm,shadowsocks)
+Package/luci-app-shadowsocks-Client/prerm = $(call Package/shadowsocks/prerm,shadowsocks)
+Package/luci-app-shadowsocks-GFW/prerm = $(call Package/shadowsocks/prerm,GFW)
 
-define Package/luci-app-shadowsocks-openwrt-Server/prerm
+define Package/luci-app-shadowsocks-Server/prerm
 #!/bin/sh
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	/etc/init.d/shadowsocks-openwrt disable
-	/etc/init.d/shadowsocks-openwrt stop
+	/etc/init.d/shadowsocks disable
+	/etc/init.d/shadowsocks stop
 fi 
 exit 0
 endef
 
 
-define Package/shadowsocks-openwrt/postinst
+define Package/shadowsocks/postinst
 #!/bin/sh
 if [ -z "$${IPKG_INSTROOT}" ]; then
 	uci -q batch <<-EOF >/dev/null
-		delete firewall.shadowsocks-openwrt
-		set firewall.shadowsocks-openwrt=include
-		set firewall.shadowsocks-openwrt.type=script
-		set firewall.shadowsocks-openwrt.path=/var/etc/shadowsocks-openwrt.include
-		set firewall.shadowsocks-openwrt.reload=0
+		delete firewall.shadowsocks
+		set firewall.shadowsocks=include
+		set firewall.shadowsocks.type=script
+		set firewall.shadowsocks.path=/var/etc/shadowsocks.include
+		set firewall.shadowsocks.reload=0
 		commit firewall
 EOF
 fi
 
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	( . /etc/uci-defaults/luci-shadowsocks-openwrt ) && rm -f /etc/uci-defaults/luci-shadowsocks-openwrt
-	chmod 755 /etc/init.d/shadowsocks-openwrt >/dev/null 2>&1
-	/etc/init.d/shadowsocks-openwrt enable >/dev/null 2>&1
+	( . /etc/uci-defaults/luci-shadowsocks ) && rm -f /etc/uci-defaults/luci-shadowsocks
+	chmod 755 /etc/init.d/shadowsocks >/dev/null 2>&1
+	/etc/init.d/shadowsocks enable >/dev/null 2>&1
 fi
 exit 0
 endef
 
-Package/luci-app-shadowsocks-openwrt/postinst = $(call Package/shadowsocks-openwrt/postinst,shadowsocks-openwrt)
-Package/luci-app-shadowsocks-openwrt-Client/postinst = $(call Package/shadowsocks-openwrt/postinst,shadowsocks-openwrt)
-Package/luci-app-shadowsocks-openwrt-GFW/postinst = $(call Package/shadowsocks-openwrt/postinst,GFW)
+Package/luci-app-shadowsocks/postinst = $(call Package/shadowsocks/postinst,shadowsocks)
+Package/luci-app-shadowsocks-Client/postinst = $(call Package/shadowsocks/postinst,shadowsocks)
+Package/luci-app-shadowsocks-GFW/postinst = $(call Package/shadowsocks/postinst,GFW)
 
-define Package/luci-app-shadowsocks-openwrt-Server/postinst
+define Package/luci-app-shadowsocks-Server/postinst
 #!/bin/sh
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	( . /etc/uci-defaults/luci-shadowsocks-openwrt ) && rm -f /etc/uci-defaults/luci-shadowsocks-openwrt
-	chmod 755 /etc/init.d/shadowsocks-openwrt >/dev/null 2>&1
-	/etc/init.d/shadowsocks-openwrt enable >/dev/null 2>&1
+	( . /etc/uci-defaults/luci-shadowsocks ) && rm -f /etc/uci-defaults/luci-shadowsocks
+	chmod 755 /etc/init.d/shadowsocks >/dev/null 2>&1
+	/etc/init.d/shadowsocks enable >/dev/null 2>&1
 fi
 exit 0
 endef
 
 CONFIGURE_ARGS += --disable-documentation --disable-ssp
 
-define Package/shadowsocks-openwrt/install
+define Package/shadowsocks/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
 	$(INSTALL_DATA) ./files/luci/controller/$(2).lua $(1)/usr/lib/lua/luci/controller/$(2).lua
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
 	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks/
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks-openwrt
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks
 	$(INSTALL_DATA) ./files/luci/view/shadowsocks/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks/
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-$(2) $(1)/etc/uci-defaults/luci-$(2)
@@ -145,20 +145,20 @@ define Package/shadowsocks-openwrt/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-local $(1)/usr/bin/ss-local	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-server $(1)/usr/bin/ss-server		
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-check $(1)/usr/bin/ss-check
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rules $(1)/usr/bin/ss-rules
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.monitor $(1)/usr/bin/ss-monitor
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.switch $(1)/usr/bin/ss-switch
+	$(INSTALL_BIN) ./files/shadowsocks.rules $(1)/usr/bin/ss-rules
+	$(INSTALL_BIN) ./files/shadowsocks.monitor $(1)/usr/bin/ss-monitor
+	$(INSTALL_BIN) ./files/shadowsocks.switch $(1)/usr/bin/ss-switch
 	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_DATA) ./files/shadowsocks-openwrt.config $(1)/etc/config/shadowsocks-openwrt
+	$(INSTALL_DATA) ./files/shadowsocks.config $(1)/etc/config/shadowsocks
 	$(INSTALL_DIR) $(1)/etc
 	$(INSTALL_DATA) ./files/chnroute.txt $(1)/etc/chnroute.txt	
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.init $(1)/etc/init.d/shadowsocks-openwrt
+	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
 endef
 
-Package/luci-app-shadowsocks-openwrt/install = $(call Package/shadowsocks-openwrt/install,$(1),shadowsocks-openwrt)
+Package/luci-app-shadowsocks/install = $(call Package/shadowsocks/install,$(1),shadowsocks)
 
-define Package/luci-app-shadowsocks-openwrt-Client/install
+define Package/luci-app-shadowsocks-Client/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
 	$(INSTALL_DATA) ./files/luci/controller/shadowsocks.lua $(1)/usr/lib/lua/luci/controller/shadowsocks.lua
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
@@ -172,18 +172,18 @@ define Package/luci-app-shadowsocks-openwrt-Client/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-tunnel $(1)/usr/bin/ss-tunnel	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-local $(1)/usr/bin/ss-local
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-check $(1)/usr/bin/ss-check
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rules $(1)/usr/bin/ss-rules
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.monitor $(1)/usr/bin/ss-monitor
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.switch $(1)/usr/bin/ss-switch
+	$(INSTALL_BIN) ./files/shadowsocks.rules $(1)/usr/bin/ss-rules
+	$(INSTALL_BIN) ./files/shadowsocks.monitor $(1)/usr/bin/ss-monitor
+	$(INSTALL_BIN) ./files/shadowsocks.switch $(1)/usr/bin/ss-switch
 	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_DATA) ./files/shadowsocks-openwrt.config $(1)/etc/config/shadowsocks-openwrt
+	$(INSTALL_DATA) ./files/shadowsocks.config $(1)/etc/config/shadowsocks
 	$(INSTALL_DIR) $(1)/etc
 	$(INSTALL_DATA) ./files/china_ssr.txt $(1)/etc/china_ssr.txt	
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.init $(1)/etc/init.d/shadowsocks-openwrt
+	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
 endef
 
-define Package/luci-app-shadowsocks-openwrt-Server/install
+define Package/luci-app-shadowsocks-Server/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
 	$(INSTALL_DATA) ./files/luci/controller/shadowsocks.lua $(1)/usr/lib/lua/luci/controller/shadowsocks.lua
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
@@ -194,15 +194,15 @@ define Package/luci-app-shadowsocks-openwrt-Server/install
 	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-server $(1)/usr/bin/ss-server		
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rules $(1)/usr/bin/ss-rules
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.monitor $(1)/usr/bin/ss-monitor
+	$(INSTALL_BIN) ./files/shadowsocks.rules $(1)/usr/bin/ss-rules
+	$(INSTALL_BIN) ./files/shadowsocks.monitor $(1)/usr/bin/ss-monitor
 	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_DATA) ./files/shadowsocks-openwrt.config $(1)/etc/config/shadowsocks-openwrt
+	$(INSTALL_DATA) ./files/shadowsocks.config $(1)/etc/config/shadowsocks
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.init $(1)/etc/init.d/shadowsocks-openwrt
+	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
 endef
 
-define Package/luci-app-shadowsocks-openwrt-GFW/install
+define Package/luci-app-shadowsocks-GFW/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
 	$(INSTALL_DATA) ./files/luci/controller/shadowsocks.lua $(1)/usr/lib/lua/luci/controller/shadowsocks.lua
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
@@ -217,21 +217,21 @@ define Package/luci-app-shadowsocks-openwrt-GFW/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-local $(1)/usr/bin/ss-local	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-server $(1)/usr/bin/ss-server		
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-check $(1)/usr/bin/ss-check
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rules $(1)/usr/bin/ss-rules
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.monitor $(1)/usr/bin/ss-monitor
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.gfw $(1)/usr/bin/ss-gfw
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.switch $(1)/usr/bin/ss-switch
+	$(INSTALL_BIN) ./files/shadowsocks.rules $(1)/usr/bin/ss-rules
+	$(INSTALL_BIN) ./files/shadowsocks.monitor $(1)/usr/bin/ss-monitor
+	$(INSTALL_BIN) ./files/shadowsocks.gfw $(1)/usr/bin/ss-gfw
+	$(INSTALL_BIN) ./files/shadowsocks.switch $(1)/usr/bin/ss-switch
 	$(INSTALL_DIR) $(1)/etc/dnsmasq.ssr
 	$(INSTALL_DATA) ./files/gfw_list.conf $(1)/etc/dnsmasq.ssr/gfw_list.conf
 	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_DATA) ./files/shadowsocks-openwrt.config $(1)/etc/config/shadowsocks-openwrt
+	$(INSTALL_DATA) ./files/shadowsocks.config $(1)/etc/config/shadowsocks
 	$(INSTALL_DIR) $(1)/etc
 	$(INSTALL_DATA) ./files/chnroute.txt $(1)/etc/chnroute.txt	
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.init $(1)/etc/init.d/shadowsocks-openwrt
+	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
 endef
 
-$(eval $(call BuildPackage,luci-app-shadowsocks-openwrt))
-#$(eval $(call BuildPackage,luci-app-shadowsocks-openwrt-Client))
-#$(eval $(call BuildPackage,luci-app-shadowsocks-openwrt-Server))
-$(eval $(call BuildPackage,luci-app-shadowsocks-openwrt-GFW))
+$(eval $(call BuildPackage,luci-app-shadowsocks))
+#$(eval $(call BuildPackage,luci-app-shadowsocks-Client))
+#$(eval $(call BuildPackage,luci-app-shadowsocks-Server))
+$(eval $(call BuildPackage,luci-app-shadowsocks-GFW))
