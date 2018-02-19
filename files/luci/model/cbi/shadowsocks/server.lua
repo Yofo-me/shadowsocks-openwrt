@@ -37,14 +37,14 @@ obfs = {
 }
 
 -- [[ Global Setting ]]--
-sec = m:section(TypedSection, "server_global", translate("Global Setting"))
+sec = m:section(TypedSection, "server_global", translate("Global Settings"))
 sec.anonymous = true
 
 o = sec:option(Flag, "enable_server", translate("Enable Server"))
 o.rmempty = false
 
 -- [[ Server Setting ]]--
-sec = m:section(TypedSection, "server_config", translate("Server Setting"))
+sec = m:section(TypedSection, "server_config", translate("Server Settings"))
 sec.anonymous = true
 sec.addremove = true
 sec.sortable = true

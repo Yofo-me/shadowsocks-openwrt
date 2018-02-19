@@ -20,7 +20,7 @@ if nixio.fs.access("/etc/pdnsd.conf") then
 	pdnsd_flag = 1
 end
 
-m = Map(shadowsocks, translate("shadowsocks Client"))
+m = Map(shadowsocks, translate("ShadowSocks Client"))
 
 local server_table = {}
 local arp_table = luci.ip.neighbors() or {}
@@ -71,7 +71,7 @@ uci:foreach(
 )
 
 -- [[ Servers Setting ]]--
-sec = m:section(TypedSection, "servers", translate("Servers Setting"))
+sec = m:section(TypedSection, "servers", translate("Servers Settings"))
 sec.anonymous = true
 sec.addremove = true
 sec.sortable = true
@@ -126,7 +126,7 @@ function o.cfgvalue(...)
 end
 
 -- [[ Global Setting ]]--
-s = m:section(TypedSection, "global", translate("Global Setting"))
+s = m:section(TypedSection, "global", translate("Global Settings"))
 s.anonymous = true
 
 o = s:option(ListValue, "global_server", translate("Global Server"))
@@ -150,7 +150,7 @@ o.rmempty = false
 o = s:option(Flag, "enable_switch", translate("Enable Auto Switch"))
 o.rmempty = false
 
-o = s:option(Value, "switch_time", translate("Switch check cycly(second)"))
+o = s:option(Value, "switch_time", translate("Switch check cycle(second)"))
 o.datatype = "uinteger"
 o:depends("enable_switch", "1")
 o.default = 600
@@ -176,7 +176,7 @@ else
 	o.rmempty = false
 
 	if pdnsd_flag == 1 then
-		o = s:option(ListValue, "pdnsd_enable", translate("Resolve Dns Mode"))
+		o = s:option(ListValue, "pdnsd_enable", translate("Resolve DNS Mode"))
 		o:value("0", translate("Use DNS Tunnel"))
 		o:value("1", translate("Use Pdnsd"))
 		o.rmempty = false

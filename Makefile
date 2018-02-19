@@ -34,9 +34,8 @@ PKG_BUILD_PARALLEL:=1
 include $(INCLUDE_DIR)/package.mk
 
 define Package/shadowsocks/Default
-	SECTION:=luci
-	CATEGORY:=LuCI
-	SUBMENU:=3. Applications
+	SECTION:=extra
+	CATEGORY:=Extra Packages
 	TITLE:=shadowsocks-libev LuCI interface
 	URL:=https://github.com/ywb94/shadowsocks
 	VARIANT:=$(1)
@@ -45,19 +44,15 @@ define Package/shadowsocks/Default
 endef
 
 
-Package/luci-app-shadowsocks = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +libsodium +libcares +libev)
-Package/luci-app-shadowsocks-Client = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +libsodium +libcares +libev)
-Package/luci-app-shadowsocks-Server = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +libsodium +libcares +libev)
-Package/luci-app-shadowsocks-GFW = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +dnsmasq-full +libsodium +libcares +libev)
+Package/luci-app-shadowsocks = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +libsodium +libcares +libev +curl +ca-bundle)
+Package/luci-app-shadowsocks-GFW = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +dnsmasq-full +libsodium +libcares +libev +curl +ca-bundle)
 
 define Package/shadowsocks/description
 	LuCI Support for $(1).
 endef
 
 Package/luci-app-shadowsocks/description = $(call Package/shadowsocks/description,shadowsocks-libev Client and Server)
-Package/luci-app-shadowsocks-Client/description = $(call Package/shadowsocks/description,shadowsocks-libev Client)
-Package/luci-app-shadowsocks-Server/description = $(call Package/shadowsocks/description,shadowsocks-libev Server)
-Package/luci-app-shadowsocks-GFW/description = $(call Package/shadowsocks/description,shadowsocks-libev GFW)
+Package/luci-app-shadowsocks-GFW/description = $(call Package/shadowsocks/description,shadowsocks-libev Client and Server with GFWList)
 
 define Package/shadowsocks/prerm
 #!/bin/sh
@@ -80,7 +75,6 @@ exit 0
 endef
 
 Package/luci-app-shadowsocks/prerm = $(call Package/shadowsocks/prerm,shadowsocks)
-Package/luci-app-shadowsocks-Client/prerm = $(call Package/shadowsocks/prerm,shadowsocks)
 Package/luci-app-shadowsocks-GFW/prerm = $(call Package/shadowsocks/prerm,GFW)
 
 define Package/luci-app-shadowsocks-Server/prerm
@@ -115,7 +109,6 @@ exit 0
 endef
 
 Package/luci-app-shadowsocks/postinst = $(call Package/shadowsocks/postinst,shadowsocks)
-Package/luci-app-shadowsocks-Client/postinst = $(call Package/shadowsocks/postinst,shadowsocks)
 Package/luci-app-shadowsocks-GFW/postinst = $(call Package/shadowsocks/postinst,GFW)
 
 define Package/luci-app-shadowsocks-Server/postinst
@@ -132,13 +125,13 @@ CONFIGURE_ARGS += --disable-documentation --disable-ssp
 
 define Package/shadowsocks/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
-	$(INSTALL_DATA) ./files/luci/controller/$(2).lua $(1)/usr/lib/lua/luci/controller/$(2).lua
+	$(INSTALL_DATA) ./files/luci/controller/shadowsocks.lua $(1)/usr/lib/lua/luci/controller/shadowsocks.lua
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
 	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks/
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks
 	$(INSTALL_DATA) ./files/luci/view/shadowsocks/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks/
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-$(2) $(1)/etc/uci-defaults/luci-$(2)
+	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-redir $(1)/usr/bin/ss-redir
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-tunnel $(1)/usr/bin/ss-tunnel
@@ -152,52 +145,6 @@ define Package/shadowsocks/install
 	$(INSTALL_DATA) ./files/shadowsocks.config $(1)/etc/config/shadowsocks
 	$(INSTALL_DIR) $(1)/etc
 	$(INSTALL_DATA) ./files/chnroute.txt $(1)/etc/chnroute.txt	
-	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
-endef
-
-Package/luci-app-shadowsocks/install = $(call Package/shadowsocks/install,$(1),shadowsocks)
-
-define Package/luci-app-shadowsocks-Client/install
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
-	$(INSTALL_DATA) ./files/luci/controller/shadowsocks.lua $(1)/usr/lib/lua/luci/controller/shadowsocks.lua
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
-	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks/
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks
-	$(INSTALL_DATA) ./files/luci/view/shadowsocks/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks/
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-redir $(1)/usr/bin/ss-redir
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-tunnel $(1)/usr/bin/ss-tunnel	
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-local $(1)/usr/bin/ss-local
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-check $(1)/usr/bin/ss-check
-	$(INSTALL_BIN) ./files/shadowsocks.rules $(1)/usr/bin/ss-rules
-	$(INSTALL_BIN) ./files/shadowsocks.monitor $(1)/usr/bin/ss-monitor
-	$(INSTALL_BIN) ./files/shadowsocks.switch $(1)/usr/bin/ss-switch
-	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_DATA) ./files/shadowsocks.config $(1)/etc/config/shadowsocks
-	$(INSTALL_DIR) $(1)/etc
-	$(INSTALL_DATA) ./files/chnroute.txt $(1)/etc/chnroute.txt	
-	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
-endef
-
-define Package/luci-app-shadowsocks-Server/install
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
-	$(INSTALL_DATA) ./files/luci/controller/shadowsocks.lua $(1)/usr/lib/lua/luci/controller/shadowsocks.lua
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
-	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks/
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks
-	$(INSTALL_DATA) ./files/luci/view/shadowsocks/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks/
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-server $(1)/usr/bin/ss-server		
-	$(INSTALL_BIN) ./files/shadowsocks.rules $(1)/usr/bin/ss-rules
-	$(INSTALL_BIN) ./files/shadowsocks.monitor $(1)/usr/bin/ss-monitor
-	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_DATA) ./files/shadowsocks.config $(1)/etc/config/shadowsocks
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
 endef
@@ -219,19 +166,17 @@ define Package/luci-app-shadowsocks-GFW/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-check $(1)/usr/bin/ss-check
 	$(INSTALL_BIN) ./files/shadowsocks.rules $(1)/usr/bin/ss-rules
 	$(INSTALL_BIN) ./files/shadowsocks.monitor $(1)/usr/bin/ss-monitor
-	$(INSTALL_BIN) ./files/shadowsocks.gfw $(1)/usr/bin/ss-gfw
 	$(INSTALL_BIN) ./files/shadowsocks.switch $(1)/usr/bin/ss-switch
-	$(INSTALL_DIR) $(1)/etc/dnsmasq.shadowsocks
-	$(INSTALL_DATA) ./files/gfw_list.conf $(1)/etc/dnsmasq.shadowsocks/gfw_list.conf
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/shadowsocks.config $(1)/etc/config/shadowsocks
 	$(INSTALL_DIR) $(1)/etc
 	$(INSTALL_DATA) ./files/chnroute.txt $(1)/etc/chnroute.txt	
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
+	$(INSTALL_BIN) ./files/shadowsocks.gfw $(1)/usr/bin/ss-gfw
+	$(INSTALL_DIR) $(1)/etc/dnsmasq.shadowsocks
+	$(INSTALL_DATA) ./files/gfw_list.conf $(1)/etc/dnsmasq.shadowsocks/gfw_list.conf
 endef
 
 $(eval $(call BuildPackage,luci-app-shadowsocks))
-#$(eval $(call BuildPackage,luci-app-shadowsocks-Client))
-#$(eval $(call BuildPackage,luci-app-shadowsocks-Server))
 $(eval $(call BuildPackage,luci-app-shadowsocks-GFW))
