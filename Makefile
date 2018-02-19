@@ -90,13 +90,11 @@ if [ -z "$${IPKG_INSTROOT}" ]; then
 	/etc/init.d/shadowsocks-openwrt stop
 fi 
 exit 0
-
 endef
 
 
 define Package/shadowsocks-openwrt/postinst
 #!/bin/sh
-
 if [ -z "$${IPKG_INSTROOT}" ]; then
 	uci -q batch <<-EOF >/dev/null
 		delete firewall.shadowsocks-openwrt
@@ -116,14 +114,12 @@ fi
 exit 0
 endef
 
-
 Package/luci-app-shadowsocks-openwrt/postinst = $(call Package/shadowsocks-openwrt/postinst,shadowsocks-openwrt)
 Package/luci-app-shadowsocks-openwrt-Client/postinst = $(call Package/shadowsocks-openwrt/postinst,shadowsocks-openwrt)
 Package/luci-app-shadowsocks-openwrt-GFW/postinst = $(call Package/shadowsocks-openwrt/postinst,GFW)
 
 define Package/luci-app-shadowsocks-openwrt-Server/postinst
 #!/bin/sh
-
 if [ -z "$${IPKG_INSTROOT}" ]; then
 	( . /etc/uci-defaults/luci-shadowsocks-openwrt ) && rm -f /etc/uci-defaults/luci-shadowsocks-openwrt
 	chmod 755 /etc/init.d/shadowsocks-openwrt >/dev/null 2>&1
@@ -132,19 +128,15 @@ fi
 exit 0
 endef
 
-
-
 CONFIGURE_ARGS += --disable-documentation --disable-ssp
 
 define Package/shadowsocks-openwrt/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
 	$(INSTALL_DATA) ./files/luci/controller/$(2).lua $(1)/usr/lib/lua/luci/controller/$(2).lua
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	$(INSTALL_DATA) ./files/luci/i18n/$(2).*.lmo $(1)/usr/lib/lua/luci/i18n
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks-openwrt
-	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks-openwrt/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks-openwrt/
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
+	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks/
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks-openwrt
-	$(INSTALL_DATA) ./files/luci/view/shadowsocks-openwrt/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks-openwrt/
+	$(INSTALL_DATA) ./files/luci/view/shadowsocks/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks/
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-$(2) $(1)/etc/uci-defaults/luci-$(2)
 	$(INSTALL_DIR) $(1)/usr/bin
@@ -153,7 +145,7 @@ define Package/shadowsocks-openwrt/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-local $(1)/usr/bin/ss-local	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-server $(1)/usr/bin/ss-server		
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-check $(1)/usr/bin/ss-check
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rule $(1)/usr/bin/ss-rules
+	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rules $(1)/usr/bin/ss-rules
 	$(INSTALL_BIN) ./files/shadowsocks-openwrt.monitor $(1)/usr/bin/ss-monitor
 	$(INSTALL_BIN) ./files/shadowsocks-openwrt.switch $(1)/usr/bin/ss-switch
 	$(INSTALL_DIR) $(1)/etc/config
@@ -168,21 +160,19 @@ Package/luci-app-shadowsocks-openwrt/install = $(call Package/shadowsocks-openwr
 
 define Package/luci-app-shadowsocks-openwrt-Client/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
-	$(INSTALL_DATA) ./files/luci/controller/shadowsocks-openwrt.lua $(1)/usr/lib/lua/luci/controller/shadowsocks-openwrt.lua
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	$(INSTALL_DATA) ./files/luci/i18n/shadowsocks-openwrt.*.lmo $(1)/usr/lib/lua/luci/i18n
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks-openwrt
-	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks-openwrt/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks-openwrt/
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks-openwrt
-	$(INSTALL_DATA) ./files/luci/view/shadowsocks-openwrt/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks-openwrt/
+	$(INSTALL_DATA) ./files/luci/controller/shadowsocks.lua $(1)/usr/lib/lua/luci/controller/shadowsocks.lua
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
+	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks/
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks
+	$(INSTALL_DATA) ./files/luci/view/shadowsocks/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks/
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks-openwrt $(1)/etc/uci-defaults/luci-shadowsocks-openwrt
+	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-redir $(1)/usr/bin/ss-redir
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-tunnel $(1)/usr/bin/ss-tunnel	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-local $(1)/usr/bin/ss-local
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-check $(1)/usr/bin/ss-check
-	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rule $(1)/usr/bin/ss-rules
+	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rules $(1)/usr/bin/ss-rules
 	$(INSTALL_BIN) ./files/shadowsocks-openwrt.monitor $(1)/usr/bin/ss-monitor
 	$(INSTALL_BIN) ./files/shadowsocks-openwrt.switch $(1)/usr/bin/ss-switch
 	$(INSTALL_DIR) $(1)/etc/config
@@ -195,15 +185,13 @@ endef
 
 define Package/luci-app-shadowsocks-openwrt-Server/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
-	$(INSTALL_DATA) ./files/luci/controller/shadowsocks-openwrt.lua $(1)/usr/lib/lua/luci/controller/shadowsocks-openwrt.lua
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	$(INSTALL_DATA) ./files/luci/i18n/shadowsocks-openwrt.*.lmo $(1)/usr/lib/lua/luci/i18n
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks-openwrt
-	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks-openwrt/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks-openwrt/
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks-openwrt
-	$(INSTALL_DATA) ./files/luci/view/shadowsocks-openwrt/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks-openwrt/
+	$(INSTALL_DATA) ./files/luci/controller/shadowsocks.lua $(1)/usr/lib/lua/luci/controller/shadowsocks.lua
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
+	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks/
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks
+	$(INSTALL_DATA) ./files/luci/view/shadowsocks/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks/
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks-openwrt $(1)/etc/uci-defaults/luci-shadowsocks-openwrt
+	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-server $(1)/usr/bin/ss-server		
 	$(INSTALL_BIN) ./files/shadowsocks-openwrt.rule $(1)/usr/bin/ss-rules
@@ -216,15 +204,13 @@ endef
 
 define Package/luci-app-shadowsocks-openwrt-GFW/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
-	$(INSTALL_DATA) ./files/luci/controller/shadowsocks-openwrt.lua $(1)/usr/lib/lua/luci/controller/shadowsocks-openwrt.lua
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	$(INSTALL_DATA) ./files/luci/i18n/shadowsocks-openwrt.*.lmo $(1)/usr/lib/lua/luci/i18n
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks-openwrt
-	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks-openwrt/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks-openwrt/
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks-openwrt
-	$(INSTALL_DATA) ./files/luci/view/shadowsocks-openwrt/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks-openwrt/
+	$(INSTALL_DATA) ./files/luci/controller/shadowsocks.lua $(1)/usr/lib/lua/luci/controller/shadowsocks.lua
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
+	$(INSTALL_DATA) ./files/luci/model/cbi/shadowsocks/*.lua $(1)/usr/lib/lua/luci/model/cbi/shadowsocks/
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/shadowsocks
+	$(INSTALL_DATA) ./files/luci/view/shadowsocks/*.htm $(1)/usr/lib/lua/luci/view/shadowsocks/
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks-openwrt $(1)/etc/uci-defaults/luci-shadowsocks-openwrt
+	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-redir $(1)/usr/bin/ss-redir
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-tunnel $(1)/usr/bin/ss-tunnel
@@ -240,7 +226,7 @@ define Package/luci-app-shadowsocks-openwrt-GFW/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/shadowsocks-openwrt.config $(1)/etc/config/shadowsocks-openwrt
 	$(INSTALL_DIR) $(1)/etc
-	$(INSTALL_DATA) ./files/china_ssr.txt $(1)/etc/china_ssr.txt	
+	$(INSTALL_DATA) ./files/chnroute.txt $(1)/etc/chnroute.txt	
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/shadowsocks-openwrt.init $(1)/etc/init.d/shadowsocks-openwrt
 endef
