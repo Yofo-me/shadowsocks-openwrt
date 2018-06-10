@@ -2,7 +2,7 @@
 -- Licensed to the public under the GNU General Public License v3.
 
 local m, s, o
-local shadowsocksr = "shadowsocksr"
+local shadowsocks = "shadowsocks"
 local sid = arg[1]
 
 local encrypt_methods = {
@@ -33,10 +33,10 @@ obfs = {
 	"tls1.2_ticket_auth"
 }
 
-m = Map(shadowsocksr, translate("Edit ShadowSocksR Server"))
+m = Map(shadowsocks, translate("Edit ShadowSocksR Server"))
 
-m.redirect = luci.dispatcher.build_url("admin/services/shadowsocksr/server")
-if m.uci:get(shadowsocksr, sid) ~= "server_config" then
+m.redirect = luci.dispatcher.build_url("admin/services/shadowsocks/server")
+if m.uci:get(shadowsocks, sid) ~= "server_config" then
 	luci.http.redirect(m.redirect)
 	return
 end
