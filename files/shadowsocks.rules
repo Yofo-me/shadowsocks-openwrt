@@ -7,9 +7,9 @@
 # See /LICENSE for more information.
 #
 
-TAG="_SS_SPEC_RULE_"   # comment tag
-IPT="iptables -t nat"  # alias of iptables
-FWI=$(uci get firewall.shadowsocks.path 2>/dev/null)  # firewall include file
+TAG="_SS_SPEC_RULE_"                                 # comment tag
+IPT="iptables -t nat"                                # alias of iptables
+FWI=$(uci get firewall.shadowsocks.path 2>/dev/null) # firewall include file
 
 usage() {
 	cat <<-EOF
@@ -65,28 +65,28 @@ flush_r() {
 }
 
 ipset_r() {
-	if [ -z "$GFWMODE" ] ;then
-	ipset -! -R <<-EOF || return 1
+	if [ -z "$GFWMODE" ]; then
+		ipset -! -R <<-EOF || return 1
 		create ss_spec_wan_ac hash:net
 		$(gen_iplist | sed -e "s/^/add ss_spec_wan_ac /")
 		$(for ip in $WAN_FW_IP; do echo "add ss_spec_wan_ac $ip nomatch"; done)
 EOF
-	$IPT -N SS_SPEC_WAN_AC && \
-	$IPT -A SS_SPEC_WAN_AC -m set --match-set ss_spec_wan_ac dst -j RETURN && \
-	$IPT -A SS_SPEC_WAN_AC -j SS_SPEC_WAN_FW
+		$IPT -N SS_SPEC_WAN_AC &&
+			$IPT -A SS_SPEC_WAN_AC -m set --match-set ss_spec_wan_ac dst -j RETURN &&
+			$IPT -A SS_SPEC_WAN_AC -j SS_SPEC_WAN_FW
 	else
-	ipset -N gfwlist iphash 2>/dev/null
-	for ip in $WAN_FW_IP; do ipset add gfwlist  $ip ; done
-	$IPT -N SS_SPEC_WAN_AC
-	$IPT -A SS_SPEC_WAN_AC -m set --match-set gfwlist dst -j SS_SPEC_WAN_FW
+		ipset -N gfwlist iphash 2>/dev/null
+		for ip in $WAN_FW_IP; do ipset add gfwlist $ip; done
+		$IPT -N SS_SPEC_WAN_AC
+		$IPT -A SS_SPEC_WAN_AC -m set --match-set gfwlist dst -j SS_SPEC_WAN_FW
 	fi
 	return $?
 }
 
 fw_rule() {
-	$IPT -N SS_SPEC_WAN_FW && \
-	$IPT -A SS_SPEC_WAN_FW -p tcp \
-		-j REDIRECT --to-ports $local_port 2>/dev/null || {
+	$IPT -N SS_SPEC_WAN_FW &&
+		$IPT -A SS_SPEC_WAN_FW -p tcp \
+			-j REDIRECT --to-ports $local_port 2>/dev/null || {
 		loger 3 "Can't redirect, please check the iptables."
 		exit 1
 	}
@@ -96,16 +96,16 @@ fw_rule() {
 ac_rule() {
 	if [ -n "$LAN_AC_IP" ]; then
 		case "${LAN_AC_IP:0:1}" in
-			w|W)
-				MATCH_SET="-m set --match-set ss_spec_lan_ac src"
-				;;
-			b|B)
-				MATCH_SET="-m set ! --match-set ss_spec_lan_ac src"
-				;;
-			*)
-				loger 3 "Bad argument \`-a $LAN_AC_IP\`."
-				return 2
-				;;
+		w | W)
+			MATCH_SET="-m set --match-set ss_spec_lan_ac src"
+			;;
+		b | B)
+			MATCH_SET="-m set ! --match-set ss_spec_lan_ac src"
+			;;
+		*)
+			loger 3 "Bad argument \`-a $LAN_AC_IP\`."
+			return 2
+			;;
 		esac
 	fi
 	IFNAME=$(uci get -P/var/state network.lan.ifname 2>/dev/null)
@@ -123,10 +123,10 @@ EOF
 		create ssr_gen_router hash:net
 		$(gen_spec_iplist | sed -e "s/^/add ssr_gen_router /")
 EOF
-		$IPT -N SS_SPEC_ROUTER && \
-		$IPT -A SS_SPEC_ROUTER -m set --match-set ssr_gen_router dst -j RETURN && \
-		$IPT -A SS_SPEC_ROUTER -j SS_SPEC_WAN_FW
-		$IPT -I OUTPUT 1 -p tcp -m comment --comment "$TAG" -j SS_SPEC_ROUTER	
+		$IPT -N SS_SPEC_ROUTER &&
+			$IPT -A SS_SPEC_ROUTER -m set --match-set ssr_gen_router dst -j RETURN &&
+			$IPT -A SS_SPEC_ROUTER -j SS_SPEC_WAN_FW
+		$IPT -I OUTPUT 1 -p tcp -m comment --comment "$TAG" -j SS_SPEC_ROUTER
 	fi
 	return $?
 }
@@ -137,13 +137,13 @@ tp_rule() {
 	ip route add local 0.0.0.0/0 dev lo table 100
 	local ipt="iptables -t mangle"
 	$ipt -N SS_SPEC_TPROXY
-	if [ -z "$GFWMODE" ] ;then
-	$ipt -A SS_SPEC_TPROXY -p udp -m set ! --match-set ss_spec_wan_ac dst \
-		-j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
+	if [ -z "$GFWMODE" ]; then
+		$ipt -A SS_SPEC_TPROXY -p udp -m set ! --match-set ss_spec_wan_ac dst \
+			-j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	else
-	$ipt -A SS_SPEC_TPROXY -p udp -m set  --match-set gfwlist dst \
-		-j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
-	fi	
+		$ipt -A SS_SPEC_TPROXY -p udp -m set --match-set gfwlist dst \
+			-j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
+	fi
 	$ipt -I PREROUTING 1 ${IFNAME:+-i $IFNAME} -p udp $EXT_ARGS $MATCH_SET \
 		-m comment --comment "$TAG" -j SS_SPEC_TPROXY
 	return $?
@@ -206,7 +206,7 @@ gen_include() {
 	[ -n "$FWI" ] || return 0
 	extract_rules() {
 		echo "*$1"
-		iptables-save -t $1 | grep SS_SPEC_ |\
+		iptables-save -t $1 | grep SS_SPEC_ |
 			sed -e "s/^-A \(OUTPUT\|PREROUTING\)/-I \1 1/"
 		echo 'COMMIT'
 	}
@@ -221,55 +221,55 @@ EOF
 
 while getopts ":s:l:S:L:i:e:a:b:w:oOuUfgh" arg; do
 	case "$arg" in
-		s)
-			server=$OPTARG
-			;;
-		l)
-			local_port=$OPTARG
-			;;
-		S)
-			SERVER=$OPTARG
-			;;
-		L)
-			LOCAL_PORT=$OPTARG
-			;;
-		i)
-			IGNORE_LIST=$OPTARG
-			;;
-		e)
-			EXT_ARGS=$OPTARG
-			;;
-		a)
-			LAN_AC_IP=$OPTARG
-			;;
-		b)
-			WAN_BP_IP=$(for ip in $OPTARG; do echo $ip; done)
-			;;
-		w)
-			WAN_FW_IP=$OPTARG
-			;;
-		o)
-			OUTPUT=1
-			;;
-		O)
-			OUTPUT=2
-			;;			
-		u)
-			TPROXY=1
-			;;
-		U)
-			TPROXY=2
-			;;
-		g)
-			GFWMODE=1
-			;;			
-		f)
-			flush_r
-			exit 0
-			;;
-		h)
-			usage 0
-			;;
+	s)
+		server=$OPTARG
+		;;
+	l)
+		local_port=$OPTARG
+		;;
+	S)
+		SERVER=$OPTARG
+		;;
+	L)
+		LOCAL_PORT=$OPTARG
+		;;
+	i)
+		IGNORE_LIST=$OPTARG
+		;;
+	e)
+		EXT_ARGS=$OPTARG
+		;;
+	a)
+		LAN_AC_IP=$OPTARG
+		;;
+	b)
+		WAN_BP_IP=$(for ip in $OPTARG; do echo $ip; done)
+		;;
+	w)
+		WAN_FW_IP=$OPTARG
+		;;
+	o)
+		OUTPUT=1
+		;;
+	O)
+		OUTPUT=2
+		;;
+	u)
+		TPROXY=1
+		;;
+	U)
+		TPROXY=2
+		;;
+	g)
+		GFWMODE=1
+		;;
+	f)
+		flush_r
+		exit 0
+		;;
+	h)
+		usage 0
+		;;
 	esac
 done
 
