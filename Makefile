@@ -9,12 +9,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=shadowsocks
-PKG_VERSION:=1.0.1
-#PKG_RELEASE:=1
+PKG_VERSION:=1.0.3
+PKG_RELEASE:=3
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/shadowsocks/shadowsocks-libev
-PKG_SOURCE_VERSION:=cd98427ebda19c8bf295651347039c542658464a
+PKG_SOURCE_VERSION:=ce6989aff86bed110bb0459ea10770f835d8bd3b
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
@@ -121,7 +121,7 @@ fi
 exit 0
 endef
 
-CONFIGURE_ARGS += --disable-documentation --disable-ssp
+CONFIGURE_ARGS += --enable-shared --disable-documentation --disable-ssp
 
 define Package/shadowsocks/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
@@ -133,6 +133,7 @@ define Package/shadowsocks/install
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
 	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) ./files/root/usr/bin/ss-kcptun $(1)/usr/bin/ss-kcptun
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-redir $(1)/usr/bin/ss-redir
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-tunnel $(1)/usr/bin/ss-tunnel
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-local $(1)/usr/bin/ss-local	
@@ -160,6 +161,7 @@ define Package/luci-app-shadowsocks-GFW/install
 	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-redir $(1)/usr/bin/ss-redir
+	$(INSTALL_BIN) ./files/root/usr/bin/ss-kcptun $(1)/usr/bin/ss-kcptun
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-tunnel $(1)/usr/bin/ss-tunnel
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-local $(1)/usr/bin/ss-local	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-server $(1)/usr/bin/ss-server		
