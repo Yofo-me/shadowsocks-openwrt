@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=shadowsocks
 PKG_VERSION:=1.0.3
-PKG_RELEASE:=3
+PKG_RELEASE:=10
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/shadowsocks/shadowsocks-libev
@@ -35,7 +35,7 @@ include $(INCLUDE_DIR)/package.mk
 
 define Package/shadowsocks/Default
 	SECTION:=extra
-	CATEGORY:=Extra Packages
+	CATEGORY:=Extra packages
 	TITLE:=shadowsocks-libev LuCI interface
 	URL:=https://github.com/ywb94/shadowsocks
 	VARIANT:=$(1)
@@ -45,14 +45,14 @@ endef
 
 
 Package/luci-app-shadowsocks = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +libsodium +libcares +libev +curl +ca-bundle)
-Package/luci-app-shadowsocks-GFW = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +dnsmasq-full +libsodium +libcares +libev +curl +ca-bundle)
+Package/luci-app-shadowsocks-GFW-ChinaList = $(call Package/shadowsocks/Default,mbedtls,(mbedtls),+libmbedtls +libpthread +ipset +ip +iptables-mod-tproxy +libpcre +zlib +dnsmasq-full +libsodium +libcares +libev +curl +ca-bundle)
 
 define Package/shadowsocks/description
 	LuCI Support for $(1).
 endef
 
 Package/luci-app-shadowsocks/description = $(call Package/shadowsocks/description,shadowsocks-libev Client and Server)
-Package/luci-app-shadowsocks-GFW/description = $(call Package/shadowsocks/description,shadowsocks-libev Client and Server with GFWList)
+Package/luci-app-shadowsocks-GFW-ChinaList/description = $(call Package/shadowsocks/description,shadowsocks-libev Client and Server with GFWList)
 
 define Package/shadowsocks/prerm
 #!/bin/sh
@@ -75,7 +75,7 @@ exit 0
 endef
 
 Package/luci-app-shadowsocks/prerm = $(call Package/shadowsocks/prerm,shadowsocks)
-Package/luci-app-shadowsocks-GFW/prerm = $(call Package/shadowsocks/prerm,GFW)
+Package/luci-app-shadowsocks-GFW-ChinaList/prerm = $(call Package/shadowsocks/prerm,GFW)
 
 define Package/luci-app-shadowsocks-Server/prerm
 #!/bin/sh
@@ -109,7 +109,7 @@ exit 0
 endef
 
 Package/luci-app-shadowsocks/postinst = $(call Package/shadowsocks/postinst,shadowsocks)
-Package/luci-app-shadowsocks-GFW/postinst = $(call Package/shadowsocks/postinst,GFW)
+Package/luci-app-shadowsocks-GFW-ChinaList/postinst = $(call Package/shadowsocks/postinst,GFW)
 
 define Package/luci-app-shadowsocks-Server/postinst
 #!/bin/sh
@@ -150,7 +150,7 @@ define Package/shadowsocks/install
 	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
 endef
 
-define Package/luci-app-shadowsocks-GFW/install
+define Package/luci-app-shadowsocks-GFW-ChinaList/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
 	$(INSTALL_DATA) ./files/luci/controller/shadowsocks.lua $(1)/usr/lib/lua/luci/controller/shadowsocks.lua
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/shadowsocks
@@ -177,8 +177,10 @@ define Package/luci-app-shadowsocks-GFW/install
 	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
 	$(INSTALL_BIN) ./files/shadowsocks.gfw $(1)/usr/bin/ss-gfw
 	$(INSTALL_DIR) $(1)/etc/dnsmasq.shadowsocks
+	$(INSTALL_DATA) ./files/ad.conf $(1)/etc/dnsmasq.shadowsocks/ad.conf
 	$(INSTALL_DATA) ./files/gfw_list.conf $(1)/etc/dnsmasq.shadowsocks/gfw_list.conf
+	$(INSTALL_DATA) ./files/accelerated-domains.china.conf $(1)/etc/dnsmasq.shadowsocks/accelerated-domains.china.conf
 endef
 
 $(eval $(call BuildPackage,luci-app-shadowsocks))
-$(eval $(call BuildPackage,luci-app-shadowsocks-GFW))
+$(eval $(call BuildPackage,luci-app-shadowsocks-GFW-ChinaList))

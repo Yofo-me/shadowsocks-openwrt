@@ -39,25 +39,6 @@ local encrypt_methods = {
 	"chacha20-ietf-poly1305"
 }
 
-local protocol = {
-	"origin",
-	"verify_simple",
-	"verify_sha1",
-	"auth_sha1",
-	"auth_sha1_v2",
-	"auth_sha1_v4",
-	"auth_aes128_sha1",
-	"auth_aes128_md5"
-}
-
-obfs = {
-	"plain",
-	"http_simple",
-	"http_post",
-	"tls_simple",
-	"tls1.2_ticket_auth"
-}
-
 uci:foreach(
 	shadowsocks,
 	"servers",
@@ -105,16 +86,6 @@ function o.cfgvalue(...)
 	return Value.cfgvalue(...) or "?"
 end
 
-o = sec:option(DummyValue, "protocol", translate("Protocol"))
-function o.cfgvalue(...)
-	return Value.cfgvalue(...) or "?"
-end
-
-o = sec:option(DummyValue, "obfs", translate("Obfs"))
-function o.cfgvalue(...)
-	return Value.cfgvalue(...) or "?"
-end
-
 o = sec:option(DummyValue, "kcp_enable", translate("KcpTun"))
 function o.cfgvalue(...)
 	return Value.cfgvalue(...) or "?"
@@ -155,24 +126,15 @@ o.datatype = "uinteger"
 o:depends("enable_switch", "1")
 o.default = 600
 
-o = s:option(Value, "switch_timeout", translate("Check timout(second)"))
+o = s:option(Value, "switch_timeout", translate("Check timeout(second)"))
 o.datatype = "uinteger"
 o:depends("enable_switch", "1")
 o.default = 3
 
-if gfwmode == 0 then
-	o = s:option(Flag, "tunnel_enable", translate("Enable Tunnel(DNS)"))
-	o.default = 0
-	o.rmempty = false
-
-	o = s:option(Value, "tunnel_port", translate("Tunnel Port"))
-	o.datatype = "port"
-	o.default = 5300
-	o.rmempty = false
-else
-	o = s:option(ListValue, "gfw_enable", translate("Operating mode"))
-	o:value("router", translate("IP Route Mode"))
-	o:value("gfw", translate("GFW List Mode"))
+if gfwmode == 1 then
+	o = s:option(ListValue, "gfw_enable", translate("Use DNSmasq configurations"))
+	o:value("disabled", translate("Disabled"))
+	o:value("gfw", translate("Enabled"))
 	o.rmempty = false
 
 	if pdnsd_flag == 1 then
@@ -183,11 +145,19 @@ else
 	end
 end
 
-o = s:option(Value, "tunnel_forward", translate("DNS Server IP and Port"))
+o = s:option(Flag, "tunnel_enable", translate("Enable an extra DNS tunnel other than 5353"))
+o.default = 0
+o.rmempty = false
+
+o = s:option(Value, "tunnel_port", translate("DNS tunnel port"))
+o.datatype = "port"
+o.default = 5300
+o.rmempty = false
+
+o = s:option(Value, "tunnel_forward", translate("Remote upstream DNS server IP and port"))
 o.default = "8.8.4.4:53"
 o.rmempty = false
 
--- [[ SOCKS5 Proxy ]]--
 s = m:section(TypedSection, "socks5_proxy", translate("SOCKS5 Proxy"))
 s.anonymous = true
 

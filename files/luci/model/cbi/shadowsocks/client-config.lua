@@ -102,20 +102,6 @@ for _, v in ipairs(encrypt_methods) do
 end
 o.rmempty = false
 
-o = s:option(ListValue, "protocol", translate("Protocol"))
-for _, v in ipairs(protocol) do
-	o:value(v)
-end
-o.rmempty = false
-
-o = s:option(ListValue, "obfs", translate("Obfs"))
-for _, v in ipairs(obfs) do
-	o:value(v)
-end
-o.rmempty = false
-
-o = s:option(Value, "obfs_param", translate("Obfs param(optional)"))
-
 o = s:option(Flag, "fast_open", translate("TCP Fast Open"))
 o.rmempty = false
 

@@ -23,19 +23,6 @@ local encrypt_methods = {
 	"chacha20-ietf-poly1305"
 }
 
-local protocol = {
-	"origin",
-	"verify_simple",
-	"verify_sha1"
-}
-
-obfs = {
-	"plain",
-	"http_simple",
-	"http_post",
-	"tls1.2_ticket_auth"
-}
-
 -- [[ Global Setting ]]--
 sec = m:section(TypedSection, "server_global", translate("Global Settings"))
 sec.anonymous = true
@@ -78,16 +65,6 @@ o = sec:option(DummyValue, "encrypt_method", translate("Encrypt Method"))
 function o.cfgvalue(...)
 	local v = Value.cfgvalue(...)
 	return v and v:upper() or "?"
-end
-
-o = sec:option(DummyValue, "protocol", translate("Protocol"))
-function o.cfgvalue(...)
-	return Value.cfgvalue(...) or "?"
-end
-
-o = sec:option(DummyValue, "obfs", translate("Obfs"))
-function o.cfgvalue(...)
-	return Value.cfgvalue(...) or "?"
 end
 
 return m
