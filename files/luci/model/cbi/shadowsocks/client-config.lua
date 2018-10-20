@@ -35,25 +35,6 @@ local encrypt_methods = {
 	"chacha20-ietf-poly1305"
 }
 
-local protocol = {
-	"origin",
-	"verify_simple",
-	"verify_sha1",
-	"auth_sha1",
-	"auth_sha1_v2",
-	"auth_sha1_v4",
-	"auth_aes128_sha1",
-	"auth_aes128_md5"
-}
-
-obfs = {
-	"plain",
-	"http_simple",
-	"http_post",
-	"tls_simple",
-	"tls1.2_ticket_auth"
-}
-
 m = Map(shadowsocks, translate("Edit ShadowSocks Server"))
 m.redirect = luci.dispatcher.build_url("admin/services/shadowsocks/client")
 if m.uci:get(shadowsocks, sid) ~= "servers" then
@@ -67,9 +48,6 @@ s.anonymous = true
 s.addremove = false
 
 o = s:option(Value, "alias", translate("Alias(optional)"))
-
-o = s:option(Flag, "auth_enable", translate("Onetime Authentication"))
-o.rmempty = false
 
 o = s:option(Flag, "switch_enable", translate("Auto Switch"))
 o.rmempty = false

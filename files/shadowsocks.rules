@@ -59,7 +59,7 @@ flush_r() {
 	ip route del local 0.0.0.0/0 dev lo table 100 2>/dev/null
 	ipset -X ss_spec_lan_ac 2>/dev/null
 	ipset -X ss_spec_wan_ac 2>/dev/null
-	ipset -X ssr_gen_router 2>/dev/null
+	ipset -X ss_gen_router 2>/dev/null
 	[ -n "$FWI" ] && echo '#!/bin/sh' >$FWI
 	return 0
 }
@@ -120,11 +120,11 @@ EOF
 			-m comment --comment "$TAG" -j SS_SPEC_WAN_AC
 	elif [ "$OUTPUT" = 2 ]; then
 		ipset -! -R <<-EOF || return 1
-		create ssr_gen_router hash:net
-		$(gen_spec_iplist | sed -e "s/^/add ssr_gen_router /")
+		create ss_gen_router hash:net
+		$(gen_spec_iplist | sed -e "s/^/add ss_gen_router /")
 EOF
 		$IPT -N SS_SPEC_ROUTER &&
-			$IPT -A SS_SPEC_ROUTER -m set --match-set ssr_gen_router dst -j RETURN &&
+			$IPT -A SS_SPEC_ROUTER -m set --match-set ss_gen_router dst -j RETURN &&
 			$IPT -A SS_SPEC_ROUTER -j SS_SPEC_WAN_FW
 		$IPT -I OUTPUT 1 -p tcp -m comment --comment "$TAG" -j SS_SPEC_ROUTER
 	fi

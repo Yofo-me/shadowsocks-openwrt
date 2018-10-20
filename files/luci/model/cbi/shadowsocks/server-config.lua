@@ -20,20 +20,7 @@ local encrypt_methods = {
 	"chacha20-ietf-poly1305"
 }
 
-local protocol = {
-	"origin",
-	"verify_simple",
-	"verify_sha1"
-}
-
-obfs = {
-	"plain",
-	"http_simple",
-	"http_post",
-	"tls1.2_ticket_auth"
-}
-
-m = Map(shadowsocks, translate("Edit ShadowSocksR Server"))
+m = Map(shadowsocks, translate("Edit ShadowSocks Server"))
 
 m.redirect = luci.dispatcher.build_url("admin/services/shadowsocks/server")
 if m.uci:get(shadowsocks, sid) ~= "server_config" then

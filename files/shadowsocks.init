@@ -201,11 +201,6 @@ EOF
 }
 
 start_redir() {
-	case "$(uci_get_by_name $GLOBAL_SERVER auth_enable)" in
-	1 | on | true | yes | enabled) ARG_OTA="-A" ;;
-	*) ARG_OTA="" ;;
-	esac
-
 	local kcp_enable=$(uci_get_by_name $GLOBAL_SERVER kcp_enable)
 	if [ $kcp_enable = "1" ]; then
 		[ ! -f "/usr/bin/ss-kcptun" ] && return 1
@@ -228,18 +223,14 @@ start_redir() {
 	local pid_file="/var/run/ss-retcp.pid"
 
 	if [ "$ARG_UDP" = "-U" ]; then
-		/usr/bin/ss-redir -c $CONFIG_FILE $ARG_OTA -f /var/run/ss-retcp.pid
-		case "$(uci_get_by_name $UDP_RELAY_SERVER auth_enable)" in
-		1 | on | true | yes | enabled) ARG_OTA="-A" ;;
-		*) ARG_OTA="" ;;
-		esac
+		/usr/bin/ss-redir -c $CONFIG_FILE -f /var/run/ss-retcp.pid
 		gen_config_file $UDP_RELAY_SERVER 1
 		last_config_file=$CONFIG_UDP_FILE
 		pid_file="/var/run/ss-reudp.pid"
 		redir_udp=1
 	fi
 
-	/usr/bin/ss-redir -c $last_config_file $ARG_OTA $ARG_UDP -f $pid_file
+	/usr/bin/ss-redir -c $last_config_file $ARG_UDP -f $pid_file
 
 	# This configuration is something nobody should touch
 	# because the ss-tunnel port 5353 here is also used in its gfwlist parser
@@ -336,7 +327,6 @@ start_server() {
 start_tunnel() {
 	/usr/bin/ss-tunnel \
 		-c $CONFIG_FILE \
-		$ARG_OTA \
 		${ARG_UDP:="-u"} \
 		-b 0.0.0.0 \
 		-l $(uci_get_by_type global tunnel_port 5300) \
