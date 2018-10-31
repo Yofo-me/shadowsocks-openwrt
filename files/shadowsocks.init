@@ -19,7 +19,6 @@ CONFIG_SOCK5_FILE=/var/etc/${NAME}_s.json
 server_count=0
 redir_tcp=0
 redir_udp=0
-tunnel_enable=0
 local_enable=0
 kcp_enable_flag=0
 
@@ -178,7 +177,7 @@ start_local() {
 
 	start_kcptun_if_enabled $local_server
 	gen_config_file $local_server 2
-	service_start /usr/bin/ss-local -t 1 -c $CONFIG_SOCK5_FILE -u -l $(uci_get_by_type socks5_proxy local_port 1080) -f /var/run/ss-local.pid
+	service_start /usr/bin/ss-local -f /var/run/ss-local.pid -t 1 -c $CONFIG_SOCK5_FILE -u -l $(uci_get_by_type socks5_proxy local_port 1080) 
 	local_enable=1
 }
 
@@ -188,21 +187,21 @@ start_redir() {
 	if [ "$ARG_UDP" = "-U" ]; then
 		start_kcptun_if_enabled $UDP_RELAY_SERVER
 		gen_config_file $UDP_RELAY_SERVER 1
-		service_start /usr/bin/ss-redir -t 1 -c $CONFIG_UDP_FILE -U -f /var/run/ss-reudp.pid
+		service_start /usr/bin/ss-redir -f /var/run/ss-reudp.pid -t 1 -c $CONFIG_UDP_FILE -U 
 		redir_udp=1
 
-		service_start /usr/bin/ss-redir -t 1 -c $CONFIG_FILE -f /var/run/ss-retcp.pid
+		service_start /usr/bin/ss-redir -f /var/run/ss-retcp.pid -t 1 -c $CONFIG_FILE 
 	elif [ "$ARG_UDP" = "-u" ]; then 
-		service_start /usr/bin/ss-redir -t 1 -c $CONFIG_FILE -u -f /var/run/ss-retcp.pid
+		service_start /usr/bin/ss-redir -f /var/run/ss-retcp.pid -t 1 -c $CONFIG_FILE -u 
 	else
-		service_start /usr/bin/ss-redir -t 1 -c $CONFIG_FILE -f /var/run/ss-retcp.pid
+		service_start /usr/bin/ss-redir -f /var/run/ss-retcp.pid -t 1 -c $CONFIG_FILE 
 	fi
 	redir_tcp=1
 
 	# This configuration is something nobody should touch
 	# because the ss-tunnel port 5353 here is also used in its gfwlist parser
 	if [ "$(uci_get_by_type global gfw_enable router)" = "gfw" ]; then
-		service_start /usr/bin/ss-tunnel -t 1 -c $CONFIG_FILE -b 0.0.0.0 -u -l 5353 -L $(uci_get_by_type global tunnel_forward 8.8.4.4:53) -f /var/run/ss-dns.pid
+		service_start /usr/bin/ss-tunnel -f /var/run/ss-dns.pid -t 1 -c $CONFIG_FILE -b 0.0.0.0 -u -l 5353 -L $(uci_get_by_type global tunnel_forward 8.8.4.4:53) 
 		dns_enable_flag=1
 	fi
 
@@ -248,7 +247,7 @@ start_server_instance() {
 	fi
 
 	gen_server_config_file $1 /var/etc/${NAME}_${server_count}.json
-	service_start /usr/bin/ss-server -t 1 -c /var/etc/${NAME}_${server_count}.json -u -t 1 -f /var/run/ss-server${server_count}.pid
+	service_start /usr/bin/ss-server -f /var/run/ss-server${server_count}.pid -c /var/etc/${NAME}_${server_count}.json -u -t 1 
 	iptables -t filter -A SS-SERVER-RULE -p tcp --dport $(uci_get_by_name $1 server_port) -j ACCEPT
 	iptables -t filter -A SS-SERVER-RULE -p udp --dport $(uci_get_by_name $1 server_port) -j ACCEPT
 	return 0
@@ -313,13 +312,13 @@ start() {
 	fi
 	start_server
 	start_local
+	sleep 2 && /etc/init.d/dnsmasq restart
 	if [ $(uci_get_by_type global monitor_enable) = 1 ]; then
-		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+kcp_enable_flag+local_enable+dns_enable_flag+switch_enable
+		let total_count=server_count+redir_tcp+redir_udp+kcp_enable_flag+local_enable+dns_enable_flag+switch_enable
 		if [ $total_count -gt 0 ]; then
-			service_start /usr/bin/ss-monitor $server_count $redir_tcp $redir_udp $tunnel_enable $kcp_enable_flag $local_enable $dns_enable_flag $switch_enable
+			service_start /usr/bin/ss-monitor $server_count $redir_tcp $redir_udp $kcp_enable_flag $local_enable $dns_enable_flag $switch_enable
 		fi
 	fi
-	sleep 2 && /etc/init.d/dnsmasq restart
 }
 
 stop() {
@@ -332,14 +331,6 @@ stop() {
 		iptables -X SS-SERVER-RULE 2>/dev/null
 	fi
 
-	killall -q -9 ss-monitor
-	if [ -z "$switch_server" ]; then
-		killall -q -9 ss-switch
-	fi
-	killall -q -9 ss-redir
-	killall -q -9 ss-tunnel
-	killall -q -9 ss-server
-	killall -q -9 ss-kcptun
-	killall -q -9 ss-local
+	ps | grep /usr/bin/ss- | grep -v grep | awk '{print $1}' | xargs kill -9
 	sleep 2 && /etc/init.d/dnsmasq restart
 }

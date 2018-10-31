@@ -102,6 +102,17 @@ end
 o.default = "nil"
 o.rmempty = false
 
+if gfwmode == 1 then
+	o = s:option(ListValue, "gfw_enable", translate("Use dnsmasq configurations"), translate("Enabling this will start a DNS tunnel on udp/5353 with same configuration as global server and this will become your upstream server for dnsmasq"))
+	o:value("disabled", translate("Disabled"))
+	o:value("gfw", translate("from") .. " /etc/dnsmasq.shadowsocks")
+	o.rmempty = false
+end
+
+o = s:option(Value, "tunnel_forward", translate("Remote upstream DNS server IP and port"))
+o.default = "8.8.4.4:53"
+o.rmempty = false
+
 o = s:option(ListValue, "udp_relay_server", translate("UDP Relay Server"))
 o:value("", translate("Disable"))
 o:value("same", translate("Same as Global Server"))
@@ -124,17 +135,6 @@ o = s:option(Value, "switch_timeout", translate("Check timeout (seconds)"))
 o.datatype = "uinteger"
 o:depends("enable_switch", "1")
 o.default = 3
-
-if gfwmode == 1 then
-	o = s:option(ListValue, "gfw_enable", translate("Use dnsmasq configurations"), translate("Enabling this will start a DNS tunnel on udp/5353 and this will be your upstream server for dnsmasq"))
-	o:value("disabled", translate("Disabled"))
-	o:value("gfw", translate("from") .. " /etc/dnsmasq.shadowsocks")
-	o.rmempty = false
-end
-
-o = s:option(Value, "tunnel_forward", translate("Remote upstream DNS server IP and port"))
-o.default = "8.8.4.4:53"
-o.rmempty = false
 
 s = m:section(TypedSection, "socks5_proxy", translate("Socks5 Proxy"))
 s.anonymous = true

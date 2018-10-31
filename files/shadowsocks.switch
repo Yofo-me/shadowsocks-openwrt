@@ -8,7 +8,7 @@
 #
 
 local cycle_time=60
-local switch_time=3
+local switch_time=10
 local normal_flag=0
 local server_locate=0
 local server_count=0
@@ -35,16 +35,15 @@ CURRENT_SERVER=$DEFAULT_SERVER
 check_proxy() {
 	/usr/bin/ss-check www.google.com 80 $switch_time 1
 	if [ "$?" == "0" ]; then
-		return 0
+		return 0      # everything fine
 	else
 		/usr/bin/ss-check www.baidu.com 80 $switch_time 1
 		if [ "$?" == "0" ]; then
-			return 1
+			return 1  # proxy fucked
 		else
-			return 2
+			return 2  # network fucked
 		fi
 	fi
-	return 0
 }
 
 test_proxy() {
