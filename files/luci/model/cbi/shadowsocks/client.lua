@@ -121,20 +121,20 @@ o.rmempty = false
 o = s:option(Flag, "enable_switch", translate("Enable Auto Switch"))
 o.rmempty = false
 
-o = s:option(Value, "switch_time", translate("Switch check cycle(second)"))
+o = s:option(Value, "switch_time", translate("Switch check interval (seconds)"))
 o.datatype = "uinteger"
 o:depends("enable_switch", "1")
 o.default = 600
 
-o = s:option(Value, "switch_timeout", translate("Check timeout(second)"))
+o = s:option(Value, "switch_timeout", translate("Check timeout (seconds)"))
 o.datatype = "uinteger"
 o:depends("enable_switch", "1")
 o.default = 3
 
 if gfwmode == 1 then
-	o = s:option(ListValue, "gfw_enable", translate("Use DNSmasq configurations"))
+	o = s:option(ListValue, "gfw_enable", translate("Use Dnsmasq configurations"))
 	o:value("disabled", translate("Disabled"))
-	o:value("gfw", translate("Enabled"))
+	o:value("gfw", translate("From") .. " /etc/dnsmasq.shadowsocks")
 	o.rmempty = false
 
 	if pdnsd_flag == 1 then
@@ -145,7 +145,11 @@ if gfwmode == 1 then
 	end
 end
 
-o = s:option(Flag, "tunnel_enable", translate("Enable an extra DNS tunnel other than 5353"))
+o = s:option(Value, "tunnel_forward", translate("Remote upstream DNS server IP and port"))
+o.default = "8.8.4.4:53"
+o.rmempty = false
+
+o = s:option(Flag, "tunnel_enable", translate("Run another DNS tunnel (5353/udp running by default)"))
 o.default = 0
 o.rmempty = false
 
@@ -154,11 +158,7 @@ o.datatype = "port"
 o.default = 5300
 o.rmempty = false
 
-o = s:option(Value, "tunnel_forward", translate("Remote upstream DNS server IP and port"))
-o.default = "8.8.4.4:53"
-o.rmempty = false
-
-s = m:section(TypedSection, "socks5_proxy", translate("SOCKS5 Proxy"))
+s = m:section(TypedSection, "socks5_proxy", translate("Socks5 Proxy"))
 s.anonymous = true
 
 o = s:option(ListValue, "server", translate("Server"))
