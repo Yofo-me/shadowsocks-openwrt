@@ -22,7 +22,7 @@ redir_udp=0
 tunnel_enable=0
 local_enable=0
 kcp_enable_flag=0
-kcp_flag=0
+
 gfw_enable=0
 dns_enable_flag=0
 switch_enable=0
@@ -39,6 +39,9 @@ uci_get_by_type() {
 }
 
 gen_config_file() {
+	# @param $1: Configruation name in UCI
+	# @param $2: 0 for global server, 1 for udp relay server, 2 for socks5 proxy
+
 	local host=$(uci_get_by_name $1 server)
 	if echo $host | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$" >/dev/null; then
 		hostip=${host}
@@ -52,7 +55,11 @@ gen_config_file() {
 			hostip=$(cat /etc/shadowsocks_ip)
 		fi
 	fi
-	[ $2 = "0" -a $kcp_flag = "1" ] && hostip="127.0.0.1"
+
+	local kcp_enable=$(uci_get_by_name $1 kcp_enable)
+	if [ $kcp_enable = "1" ]; then
+		hostip="127.0.0.1"
+	fi
 
 	if [ $2 = "0" ]; then
 		config_file=$CONFIG_FILE
@@ -89,7 +96,6 @@ get_arg_out() {
 
 start_rules() {
 	local server=$(uci_get_by_name $GLOBAL_SERVER server)
-	#resolve name
 	if echo $server | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$" > /dev/null; then
 		server=${server}
 	elif [ "$server" != "${server#*:[0-9a-fA-F]}" ]; then
@@ -105,17 +111,14 @@ start_rules() {
 
 	kcp_server=$server
 
-	local kcp_enable=$(uci_get_by_name $GLOBAL_SERVER kcp_enable)
-	if [ $kcp_enable = "1" ]; then
-		kcp_flag=1
-	fi
-
 	local local_port=$(uci_get_by_name $GLOBAL_SERVER local_port)
 	local lan_ac_ips=$(uci_get_by_type access_control lan_ac_ips)
 	local lan_ac_mode=$(uci_get_by_type access_control lan_ac_mode)
 	local router_proxy=$(uci_get_by_type access_control router_proxy)
-	if [ "$GLOBAL_SERVER" = "$UDP_RELAY_SERVER" -a $kcp_flag = 0 ]; then
-		ARG_UDP="-u"
+
+	local kcp_enable=$(uci_get_by_name $GLOBAL_SERVER kcp_enable)
+	if [ "$GLOBAL_SERVER" = "$UDP_RELAY_SERVER" -a $kcp_enable = 0 ]; then
+		ARG_UDP="-u" 
 	elif [ -n "$UDP_RELAY_SERVER" ]; then
 		ARG_UDP="-U"
 		local udp_server=$(uci_get_by_name $UDP_RELAY_SERVER server)
@@ -147,104 +150,60 @@ start_rules() {
 	return $?
 }
 
-start_pdnsd() {
-	local usr_dns="$1"
-	local usr_port="$2"
-
-	local tcp_dns_list="208.67.222.222, 208.67.220.220"
-	[ -z "$usr_dns" ] && usr_dns="8.8.8.8"
-	[ -z "$usr_port" ] && usr_port="53"
-	mkdir -p /var/etc /var/pdnsd
-
-	if ! test -f "/var/pdnsd/pdnsd.cache"; then
-		dd if=/dev/zero of="/var/pdnsd/pdnsd.cache" bs=1 count=4 2>/dev/null
-		chown -R nobody.nogroup /var/pdnsd
-	fi
-
-	cat >/var/etc/pdnsd.conf <<EOF
-global {
-	perm_cache=10240;
-	cache_dir="/var/pdnsd";
-	pid_file = /var/run/pdnsd.pid;
-	run_as="nobody";
-	server_ip = 127.0.0.1;
-	server_port = 5353;
-	status_ctl = on;
-	query_method = tcp_only;
-	min_ttl=1h;
-	max_ttl=1w;
-	timeout=10;
-	neg_domain_pol=on;
-	proc_limit=2;
-	procq_limit=8;
-}
-server {
-	label= "ss-usrdns";
-	ip = $usr_dns;
-	port = $usr_port;
-	timeout=6;
-	uptest=none;
-	interval=10m;
-	purge_cache=off;
-}
-server {
-	label= "ss-pdnsd";
-	ip = $tcp_dns_list;
-	port = 5353;
-	timeout=6;
-	uptest=none;
-	interval=10m;
-	purge_cache=off;
-}
-EOF
-	/usr/sbin/pdnsd -c /var/etc/pdnsd.conf -d
-}
-
-start_redir() {
-	local kcp_enable=$(uci_get_by_name $GLOBAL_SERVER kcp_enable)
-	if [ $kcp_enable = "1" ]; then
+start_kcptun_if_enabled() {
+	# @param $1: Configuration file
+	# Note that calling this function multiple times may possibly cause conflicts, 
+	# like there are two kcptun instances trying to listen on the same port
+	# but one of them will quit at once, so no big deal
+	local current_conf_kcp_enable=$(uci_get_by_name $1 kcp_enable)
+	if [ $current_conf_kcp_enable = "1" ]; then
 		[ ! -f "/usr/bin/ss-kcptun" ] && return 1
 
 		local kcp_str=$(/usr/bin/ss-kcptun -v | grep kcptun | wc -l)
 		[ "0" = $kcp_str ] && return 1
-		local kcp_port=$(uci_get_by_name $GLOBAL_SERVER kcp_port)
-		local server_port=$(uci_get_by_name $GLOBAL_SERVER server_port)
-		local password=$(uci_get_by_name $GLOBAL_SERVER kcp_password)
-		local kcp_param=$(uci_get_by_name $GLOBAL_SERVER kcp_param)
+		local kcp_port=$(uci_get_by_name $1 kcp_port)
+		local server_port=$(uci_get_by_name $1 server_port)
+		local password=$(uci_get_by_name $1 kcp_password)
+		local kcp_param=$(uci_get_by_name $1 kcp_param)
 		[ "$password" != "" ] && password="--key "${password}
 		service_start /usr/bin/ss-kcptun -r $kcp_server:$kcp_port -l :$server_port $password $kcp_param
 		kcp_enable_flag=1
 	fi
+}
 
+start_local() {
+	local local_server=$(uci_get_by_type socks5_proxy server)
+	[ "$local_server" = "nil" ] && return 1
+	mkdir -p /var/run /var/etc
+
+	start_kcptun_if_enabled $local_server
+	gen_config_file $local_server 2
+	service_start /usr/bin/ss-local -t 1 -c $CONFIG_SOCK5_FILE -u -l $(uci_get_by_type socks5_proxy local_port 1080) -f /var/run/ss-local.pid
+	local_enable=1
+}
+
+start_redir() {
+	start_kcptun_if_enabled $GLOBAL_SERVER
 	gen_config_file $GLOBAL_SERVER 0
-
-	redir_tcp=1
-	local last_config_file=$CONFIG_FILE
-	local pid_file="/var/run/ss-retcp.pid"
-
 	if [ "$ARG_UDP" = "-U" ]; then
-		/usr/bin/ss-redir -c $CONFIG_FILE -f /var/run/ss-retcp.pid
+		start_kcptun_if_enabled $UDP_RELAY_SERVER
 		gen_config_file $UDP_RELAY_SERVER 1
-		last_config_file=$CONFIG_UDP_FILE
-		pid_file="/var/run/ss-reudp.pid"
+		service_start /usr/bin/ss-redir -t 1 -c $CONFIG_UDP_FILE -U -f /var/run/ss-reudp.pid
 		redir_udp=1
-	fi
 
-	/usr/bin/ss-redir -c $last_config_file $ARG_UDP -f $pid_file
+		service_start /usr/bin/ss-redir -t 1 -c $CONFIG_FILE -f /var/run/ss-retcp.pid
+	elif [ "$ARG_UDP" = "-u" ]; then 
+		service_start /usr/bin/ss-redir -t 1 -c $CONFIG_FILE -u -f /var/run/ss-retcp.pid
+	else
+		service_start /usr/bin/ss-redir -t 1 -c $CONFIG_FILE -f /var/run/ss-retcp.pid
+	fi
+	redir_tcp=1
 
 	# This configuration is something nobody should touch
 	# because the ss-tunnel port 5353 here is also used in its gfwlist parser
 	if [ "$(uci_get_by_type global gfw_enable router)" = "gfw" ]; then
-		if [ "$(uci_get_by_type global pdnsd_enable 0)" != "1" ]; then
-			service_start /usr/bin/ss-tunnel -c $CONFIG_FILE -b 0.0.0.0 -u -l 5353 -L $(uci_get_by_type global tunnel_forward 8.8.4.4:53) -f /var/run/ss-dns.pid
-			dns_enable_flag=1
-		else
-			local dnsstr="$(uci_get_by_type global tunnel_forward 8.8.4.4:53)"
-			local dnsserver=$(echo "$dnsstr" | awk -F ':' '{print $1}')
-			local dnsport=$(echo "$dnsstr" | awk -F ':' '{print $2}')
-			ipset add gfwlist $dnsserver 2>/dev/null
-			start_pdnsd $dnsserver $dnsport
-		fi
+		service_start /usr/bin/ss-tunnel -t 1 -c $CONFIG_FILE -b 0.0.0.0 -u -l 5353 -L $(uci_get_by_type global tunnel_forward 8.8.4.4:53) -f /var/run/ss-dns.pid
+		dns_enable_flag=1
 	fi
 
 	if [ "$(uci_get_by_type global enable_switch)" = "1" ]; then
@@ -261,7 +220,7 @@ start_redir() {
 	return $?
 }
 
-gen_service_file() {
+gen_server_config_file() {
 	if [ $(uci_get_by_name $1 fast_open) = "1" ]; then
 		fastopen="true"
 	else
@@ -279,7 +238,7 @@ gen_service_file() {
 EOF
 }
 
-start_service() {
+start_server_instance() {
 	if [ $(uci_get_by_name $1 enable) = "0" ]; then 
 		return 1
 	fi
@@ -288,8 +247,8 @@ start_service() {
 		iptables -N SS-SERVER-RULE && iptables -t filter -I INPUT -j SS-SERVER-RULE
 	fi
 
-	gen_service_file $1 /var/etc/${NAME}_${server_count}.json
-	/usr/bin/ss-server -c /var/etc/${NAME}_${server_count}.json -u -f /var/run/ss-server${server_count}.pid
+	gen_server_config_file $1 /var/etc/${NAME}_${server_count}.json
+	service_start /usr/bin/ss-server -t 1 -c /var/etc/${NAME}_${server_count}.json -u -t 1 -f /var/run/ss-server${server_count}.pid
 	iptables -t filter -A SS-SERVER-RULE -p tcp --dport $(uci_get_by_name $1 server_port) -j ACCEPT
 	iptables -t filter -A SS-SERVER-RULE -p udp --dport $(uci_get_by_name $1 server_port) -j ACCEPT
 	return 0
@@ -319,32 +278,9 @@ start_server() {
 	mkdir -p /var/run /var/etc
 
 	config_load $NAME
-	config_foreach start_service server_config
+	config_foreach start_server_instance server_config
 	gen_serv_include
 	return 0
-}
-
-start_tunnel() {
-	/usr/bin/ss-tunnel \
-		-c $CONFIG_FILE \
-		${ARG_UDP:="-u"} \
-		-b 0.0.0.0 \
-		-l $(uci_get_by_type global tunnel_port 5300) \
-		-L $(uci_get_by_type global tunnel_forward 8.8.4.4:53) \
-		-f /var/run/ss-tunnel.pid
-	tunnel_enable=1
-	return $?
-}
-
-start_local() {
-	local local_server=$(uci_get_by_type socks5_proxy server)
-	[ "$local_server" = "nil" ] && return 1
-	mkdir -p /var/run /var/etc
-	gen_config_file $local_server 2
-	/usr/bin/ss-local -c $CONFIG_SOCK5_FILE -u \
-		-l $(uci_get_by_type socks5_proxy local_port 1080) \
-		-f /var/run/ss-local.pid
-	local_enable=1
 }
 
 rules() {
@@ -377,9 +313,6 @@ start() {
 	fi
 	start_server
 	start_local
-	case "$(uci_get_by_type global tunnel_enable)" in
-		1 | on | true | yes | enabled) start_tunnel ;;
-	esac
 	if [ $(uci_get_by_type global monitor_enable) = 1 ]; then
 		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+kcp_enable_flag+local_enable+dns_enable_flag+switch_enable
 		if [ $total_count -gt 0 ]; then
@@ -408,6 +341,5 @@ stop() {
 	killall -q -9 ss-server
 	killall -q -9 ss-kcptun
 	killall -q -9 ss-local
-	killall -q pdnsd
 	sleep 2 && /etc/init.d/dnsmasq restart
 }

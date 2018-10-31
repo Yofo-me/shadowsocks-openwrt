@@ -10,14 +10,8 @@ local sys = require "luci.sys"
 
 local gfwmode = 0
 
-local pdnsd_flag = 0
-
 if nixio.fs.access("/etc/dnsmasq.shadowsocks/gfw_list.conf") then
 	gfwmode = 1
-end
-
-if nixio.fs.access("/etc/pdnsd.conf") then
-	pdnsd_flag = 1
 end
 
 m = Map(shadowsocks, translate("ShadowSocks Client"))
@@ -132,30 +126,14 @@ o:depends("enable_switch", "1")
 o.default = 3
 
 if gfwmode == 1 then
-	o = s:option(ListValue, "gfw_enable", translate("Use Dnsmasq configurations"))
+	o = s:option(ListValue, "gfw_enable", translate("Use dnsmasq configurations"), translate("Enabling this will start a DNS tunnel on udp/5353 and this will be your upstream server for dnsmasq"))
 	o:value("disabled", translate("Disabled"))
-	o:value("gfw", translate("From") .. " /etc/dnsmasq.shadowsocks")
+	o:value("gfw", translate("from") .. " /etc/dnsmasq.shadowsocks")
 	o.rmempty = false
-
-	if pdnsd_flag == 1 then
-		o = s:option(ListValue, "pdnsd_enable", translate("Resolve DNS Mode"))
-		o:value("0", translate("Use DNS Tunnel"))
-		o:value("1", translate("Use Pdnsd"))
-		o.rmempty = false
-	end
 end
 
 o = s:option(Value, "tunnel_forward", translate("Remote upstream DNS server IP and port"))
 o.default = "8.8.4.4:53"
-o.rmempty = false
-
-o = s:option(Flag, "tunnel_enable", translate("Run another DNS tunnel (5353/udp running by default)"))
-o.default = 0
-o.rmempty = false
-
-o = s:option(Value, "tunnel_port", translate("DNS tunnel port"))
-o.datatype = "port"
-o.default = 5300
 o.rmempty = false
 
 s = m:section(TypedSection, "socks5_proxy", translate("Socks5 Proxy"))

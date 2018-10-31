@@ -22,16 +22,14 @@ usage() {
 		    -S <server_ip>          ip address of shadowsocks remote UDP server
 		    -L <local_port>         port number of shadowsocks local UDP server
 		    -i <ip_list_file>       a file content is bypassed ip list
-		    -a <lan_ips>            lan ip of access control, need a prefix to
-		                            define access control mode
+		    -a <lan_ips>            lan ip of access control, need a prefix to define access control mode
 		    -b <wan_ips>            wan ip of will be bypassed
 		    -w <wan_ips>            wan ip of will be forwarded
 		    -e <extra_options>      extra options for iptables
 		    -o                      apply the rules to the OUTPUT chain
 		    -O                      apply the global rules to the OUTPUT chain
-		    -u                      enable udprelay mode, TPROXY is required
-		    -U                      enable udprelay mode, using different IP
-		                            and ports for TCP and UDP
+		    -u                      enable udp relay mode, TPROXY is required
+		    -U                      enable udp relay mode, using different IP and ports for TCP and UDP
 		    -f                      flush the rules
 		    -g                      gfw list mode
 		    -h                      show this help message and exit
