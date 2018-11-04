@@ -201,7 +201,9 @@ start_redir() {
 	# This configuration is something nobody should touch
 	# because the ss-tunnel port 5353 here is also used in its gfwlist parser
 	if [ "$(uci_get_by_type global gfw_enable router)" = "gfw" ]; then
-		service_start /usr/bin/ss-tunnel -f /var/run/ss-dns.pid -t 1 -c $CONFIG_FILE -b 0.0.0.0 -u -l 5353 -L $(uci_get_by_type global tunnel_forward 8.8.4.4:53) 
+		local tunnel_port=$(uci_get_by_type global tunnel_port 5300)
+		local tunnel_forward=$(uci_get_by_type global tunnel_forward 8.8.4.4:53)
+		service_start /usr/bin/ss-tunnel -f /var/run/ss-dns.pid -t 1 -c $CONFIG_FILE -b 0.0.0.0 -u -l $tunnel_port -L $tunnel_forward
 		dns_enable_flag=1
 	fi
 

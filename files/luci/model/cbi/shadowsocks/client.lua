@@ -103,15 +103,20 @@ o.default = "nil"
 o.rmempty = false
 
 if gfwmode == 1 then
-	o = s:option(ListValue, "gfw_enable", translate("Use dnsmasq configurations"), translate("Enabling this will start a DNS tunnel on udp/5353 with same configuration as global server and this will become your upstream server for dnsmasq"))
+	o = s:option(ListValue, "gfw_enable", translate("Use dnsmasq configurations"), translate("Enabling this will start a DNS tunnel with same configuration as global server and set localhost:5353 as dnsmasq upstream server"))
 	o:value("disabled", translate("Disabled"))
 	o:value("gfw", translate("from") .. " /etc/dnsmasq.shadowsocks")
 	o.rmempty = false
-end
 
-o = s:option(Value, "tunnel_forward", translate("Remote upstream DNS server IP and port"))
-o.default = "8.8.4.4:53"
-o.rmempty = false
+	o = s:option(Value, "tunnel_forward", translate("Remote upstream DNS server IP and port"))
+	o.default = "8.8.4.4:53"
+	o.rmempty = false
+
+	o = s:option(ListValue, "tunnel_port", translate("DNS tunnel listen port"), translate("You need to make sure there is a reliable DNS runing on localhost:5353"))
+	o:value("5300", translate("5300 (use custom dns forwarder)"))
+	o:value("5353", translate("5353 (serve directly as dnsmasq upstream)"))
+	o.rmempty = false
+end
 
 o = s:option(ListValue, "udp_relay_server", translate("UDP Relay Server"))
 o:value("", translate("Disable"))
