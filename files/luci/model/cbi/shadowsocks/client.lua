@@ -4,7 +4,6 @@
 local m, s, sec, o, kcp_enable
 local shadowsocks = "shadowsocks"
 local uci = luci.model.uci.cursor()
-local ipkg = require("luci.model.ipkg")
 
 local sys = require "luci.sys"
 
