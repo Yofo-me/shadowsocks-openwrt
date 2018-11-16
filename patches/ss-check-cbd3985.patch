@@ -44,10 +44,10 @@ index b926e7d..00b8569 100644
  libshadowsocks_libev_la_SOURCES = $(ss_local_SOURCES)
 diff --git a/src/check.c b/src/check.c
 new file mode 100644
-index 0000000..be9172f
+index 0000000..4746330
 --- /dev/null
 +++ b/src/check.c
-@@ -0,0 +1,210 @@
+@@ -0,0 +1,207 @@
 +#include <stdlib.h>
 +#include <stdio.h>
 +#include <unistd.h>
@@ -122,8 +122,7 @@ index 0000000..be9172f
 +            memcpy(file, ptr2 + 1, strlen(ptr2) - 1);
 +            file[strlen(ptr2) - 1] = '\0';
 +        }
-+    }
-+    else {
++    } else {
 +        memcpy(host, ptr1, strlen(ptr1));
 +        host[strlen(ptr1)] = '\0';
 +    }
@@ -132,8 +131,7 @@ index 0000000..be9172f
 +    if (ptr1) {
 +        *ptr1++ = '\0';
 +        *port = atoi(ptr1);
-+    }
-+    else {
++    } else {
 +        *port = MY_HTTP_DEFAULT_PORT;
 +    }
 +
@@ -252,8 +250,7 @@ index 0000000..be9172f
 +    if (http_ret == 1) {
 +        DEBUG("recv err");
 +        return 1;
-+    }
-+    else {
++    } else {
 +        DEBUG("recv ok");
 +        return 0;
 +    }
