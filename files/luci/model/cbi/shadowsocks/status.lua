@@ -1,7 +1,6 @@
 -- Copyright (C) 2017 yushi studio <ywb94@qq.com>
 -- Licensed to the public under the GNU General Public License v3.
 
-local IPK_Version = "1.2.1"
 local m, s, o
 local redir_run = 0
 local reudp_run = 0
@@ -163,20 +162,8 @@ s = m:field(DummyValue, "check_port", translate("Check Server Port"))
 s.template = "shadowsocks/checkport"
 s.value = translate("No Check")
 
-s = m:field(DummyValue, "version", translate("IPK Version"))
-s.rawhtml = true
-s.value = IPK_Version
-
 s = m:field(DummyValue, "kcp_version", translate("KcpTun Version"))
 s.rawhtml = true
 s.value = kcptun_version
-
-s = m:field(DummyValue, "project", translate("Project"))
-s.rawhtml = true
-s.value =
-    bold_on ..
-    [[<a href="]] ..
-        "https://github.com/ywb94/openwrt-ssr" ..
-            [[" >]] .. "https://github.com/ywb94/openwrt-ssr" .. [[</a>]] .. bold_off
 
 return m
