@@ -111,7 +111,7 @@ if gfwmode == 1 then
 	o.default = "8.8.4.4:53"
 	o.rmempty = false
 
-	o = s:option(ListValue, "tunnel_port", translate("DNS tunnel listen port"), translate("You need to make sure there is a reliable DNS runing on localhost:5353"))
+	o = s:option(ListValue, "tunnel_port", translate("DNS tunnel listen port"), translate("You need to make sure there is a reliable DNS running on localhost:5353"))
 	o:value("5300", translate("5300 (use custom dns forwarder)"))
 	o:value("5353", translate("5353 (serve directly as dnsmasq upstream)"))
 	o.rmempty = false
