@@ -133,7 +133,6 @@ define Package/shadowsocks/install
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) ./files/root/usr/bin/ss-kcptun $(1)/usr/bin/ss-kcptun
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-redir $(1)/usr/bin/ss-redir
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-tunnel $(1)/usr/bin/ss-tunnel
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-local $(1)/usr/bin/ss-local	
@@ -161,7 +160,6 @@ define Package/luci-app-shadowsocks-GFW-ChinaList/install
 	$(INSTALL_BIN) ./files/root/etc/uci-defaults/luci-shadowsocks $(1)/etc/uci-defaults/luci-shadowsocks
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-redir $(1)/usr/bin/ss-redir
-	$(INSTALL_BIN) ./files/root/usr/bin/ss-kcptun $(1)/usr/bin/ss-kcptun
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-tunnel $(1)/usr/bin/ss-tunnel
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-local $(1)/usr/bin/ss-local	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ss-server $(1)/usr/bin/ss-server		
