@@ -173,10 +173,8 @@ define Package/luci-app-shadowsocks-GFW-ChinaList/install
 	$(INSTALL_DATA) ./files/chnroute.txt $(1)/etc/chnroute.txt	
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/shadowsocks.init $(1)/etc/init.d/shadowsocks
-	$(INSTALL_BIN) ./files/shadowsocks.gfw $(1)/usr/bin/ss-gfw
 	$(INSTALL_DIR) $(1)/etc/dnsmasq.shadowsocks
 	$(INSTALL_DATA) ./files/ad.conf $(1)/etc/dnsmasq.shadowsocks/ad.conf
-	$(INSTALL_DATA) ./files/gfw_list.conf $(1)/etc/dnsmasq.shadowsocks/gfw_list.conf
 	$(INSTALL_DATA) ./files/accelerated-domains.china.conf $(1)/etc/dnsmasq.shadowsocks/accelerated-domains.china.conf
 endef
 

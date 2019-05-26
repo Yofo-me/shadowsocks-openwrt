@@ -43,16 +43,15 @@ function refresh_data()
     local set = luci.http.formvalue("set")
     local icount = 0
 
-    if set == "gfw_data" then
-        refresh_cmd = "curl https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt > /tmp/gfw.b64"
+    if set == "dns_whitelist_data" then
+        refresh_cmd = "curl https://github.com/felixonmars/dnsmasq-china-list/raw/master/accelerated-domains.china.conf > /tmp/accelerated-domains.china.conf"
         sret = luci.sys.call(refresh_cmd .. " 2>/dev/null")
         if sret == 0 then
-            luci.sys.call("/usr/bin/ss-gfw")
-            icount = luci.sys.exec("cat /tmp/gfwnew.txt | wc -l")
+            icount = luci.sys.exec("cat /tmp/accelerated-domains.china.conf | wc -l")
             if tonumber(icount) > 1000 then
-                oldcount = luci.sys.exec("cat /etc/dnsmasq.shadowsocks/gfw_list.conf | wc -l")
+                oldcount = luci.sys.exec("cat /etc/dnsmasq.shadowsocks/accelerated-domains.china.conf | wc -l")
                 if tonumber(icount) ~= tonumber(oldcount) then
-                    luci.sys.exec("cp -f /tmp/gfwnew.txt /etc/dnsmasq.shadowsocks/gfw_list.conf")
+                    luci.sys.exec("cp -f /tmp/accelerated-domains.china.conf /etc/dnsmasq.shadowsocks/accelerated-domains.china.conf")
                     retstring = tostring(math.ceil(tonumber(icount) / 2))
                 else
                     retstring = "0"
@@ -60,7 +59,7 @@ function refresh_data()
             else
                 retstring = "-1"
             end
-            luci.sys.exec("rm -f /tmp/gfwnew.txt ")
+            luci.sys.exec("rm -f /tmp/accelerated-domains.china.conf ")
         else
             retstring = "-1"
         end

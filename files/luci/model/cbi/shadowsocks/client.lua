@@ -7,10 +7,10 @@ local uci = luci.model.uci.cursor()
 
 local sys = require "luci.sys"
 
-local gfwmode = 0
+local dnsmasq_conf = 0
 
-if nixio.fs.access("/etc/dnsmasq.shadowsocks/gfw_list.conf") then
-	gfwmode = 1
+if nixio.fs.access("/etc/dnsmasq.shadowsocks/accelerated-domains.china.conf") then
+	dnsmasq_conf = 1
 end
 
 m = Map(shadowsocks, translate("ShadowSocks Client"))
@@ -101,7 +101,7 @@ end
 o.default = "nil"
 o.rmempty = false
 
-if gfwmode == 1 then
+if dnsmasq_conf == 1 then
 	o = s:option(ListValue, "gfw_enable", translate("Use dnsmasq configurations"), translate("Enabling this will start a DNS tunnel with same configuration as global server and set localhost:5353 as dnsmasq upstream server"))
 	o:value("disabled", translate("Disabled"))
 	o:value("gfw", translate("from") .. " /etc/dnsmasq.shadowsocks")

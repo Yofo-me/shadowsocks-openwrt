@@ -8,13 +8,13 @@ local sock5_run = 0
 local server_run = 0
 local kcptun_run = 0
 local tunnel_run = 0
-local gfw_count = 0
+local dns_whitelist_count = 0
 local ad_count = 0
 local ip_count = 0
-local gfwmode = 0
+local dnsmasq_conf = 0
 
-if nixio.fs.access("/etc/dnsmasq.shadowsocks/gfw_list.conf") then
-    gfwmode = 1
+if nixio.fs.access("/etc/dnsmasq.shadowsocks/accelerated-domains.china.conf") then
+    dnsmasq_conf = 1
 end
 
 local shadowsocks = "shadowsocks"
@@ -40,8 +40,8 @@ else
     end
 end
 
-if gfwmode == 1 then
-    gfw_count = tonumber(sys.exec("cat /etc/dnsmasq.shadowsocks/gfw_list.conf | wc -l")) / 2
+if dnsmasq_conf == 1 then
+    dns_whitelist_count = tonumber(sys.exec("cat /etc/dnsmasq.shadowsocks/accelerated-domains.china.conf | wc -l")) / 2
     if nixio.fs.access("/etc/dnsmasq.shadowsocks/ad.conf") then
         ad_count = tonumber(sys.exec("cat /etc/dnsmasq.shadowsocks/ad.conf | wc -l"))
     end
@@ -141,11 +141,11 @@ s = m:field(DummyValue, "baidu", translate("Baidu Connectivity"))
 s.value = translate("No Check")
 s.template = "shadowsocks/check"
 
-if gfwmode == 1 then
-    s = m:field(DummyValue, "gfw_data", translate("GFW List Data"))
+if dnsmasq_conf == 1 then
+    s = m:field(DummyValue, "dns_whitelist_data", translate("DNS White List Data"))
     s.rawhtml = true
     s.template = "shadowsocks/refresh"
-    s.value = tostring(math.ceil(gfw_count)) .. " " .. translate("Records")
+    s.value = tostring(math.ceil(dns_whitelist_count)) .. " " .. translate("Records")
 
     s = m:field(DummyValue, "ad_data", translate("Advertising Data"))
     s.rawhtml = true
