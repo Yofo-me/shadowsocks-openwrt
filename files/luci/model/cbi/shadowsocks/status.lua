@@ -6,7 +6,6 @@ local redir_run = 0
 local reudp_run = 0
 local sock5_run = 0
 local server_run = 0
-local kcptun_run = 0
 local tunnel_run = 0
 local dns_whitelist_count = 0
 local ad_count = 0
@@ -26,19 +25,6 @@ bold_off = [[</strong>]]
 
 local fs = require "nixio.fs"
 local sys = require "luci.sys"
-local kcptun_version = translate("Unknown")
-local kcp_file = "/usr/bin/ss-kcptun"
-if not fs.access(kcp_file) then
-    kcptun_version = translate("Not exist")
-else
-    if not fs.access(kcp_file, "rwx", "rx", "rx") then
-        fs.chmod(kcp_file, 755)
-    end
-    kcptun_version = sys.exec(kcp_file .. " -v | awk '{printf $3}'")
-    if not kcptun_version or kcptun_version == "" then
-        kcptun_version = translate("Unknown")
-    end
-end
 
 if dnsmasq_conf == 1 then
     dns_whitelist_count = tonumber(sys.exec("cat /etc/dnsmasq.shadowsocks/accelerated-domains.china.conf | wc -l")) / 2
@@ -117,14 +103,6 @@ else
     s.value = translate("Not Running")
 end
 
-s = m:field(DummyValue, "kcptun_run", translate("KcpTun"))
-s.rawhtml = true
-if kcptun_run == 1 then
-    s.value = font_blue .. bold_on .. translate("Running") .. bold_off .. font_off
-else
-    s.value = translate("Not Running")
-end
-
 s = m:field(DummyValue, "server_run", translate("ShadowSocks Server"))
 s.rawhtml = true
 if server_run == 1 then
@@ -161,9 +139,5 @@ s.value = ip_count .. " " .. translate("Records")
 s = m:field(DummyValue, "check_port", translate("Check Server Port"))
 s.template = "shadowsocks/checkport"
 s.value = translate("No Check")
-
-s = m:field(DummyValue, "kcp_version", translate("KcpTun Version"))
-s.rawhtml = true
-s.value = kcptun_version
 
 return m

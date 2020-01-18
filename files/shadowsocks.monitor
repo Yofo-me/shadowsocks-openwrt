@@ -36,9 +36,8 @@ check_proxy() {
 server_process_count=$1
 redir_tcp_process=$2
 redir_udp_process=$3
-kcp_process=$4
-local_process=$5
-dns_process=$6
+local_process=$4
+dns_process=$5
 if [ -z "$dns_process" ]; then
 	dns_process=0
 fi
@@ -70,15 +69,6 @@ while [ "1" = "1" ]; do
 		icount=$(ps | grep ss-server | grep -v grep | wc -l)
 		if [ $icount -lt $server_process_count ]; then
 			logger -t "$NAME" "ss server error.restart!"
-			exec /etc/init.d/shadowsocks restart
-			exit 0
-		fi
-	fi
-	# kcptun
-	if [ $kcp_process -gt 0 ]; then
-		icount=$(ps | grep ss-kcptun | grep -v grep | wc -l)
-		if [ $icount -lt $kcp_process ]; then
-			logger -t "$NAME" "ss kcptun error.restart!"
 			exec /etc/init.d/shadowsocks restart
 			exit 0
 		fi

@@ -7,16 +7,6 @@ local uci = luci.model.uci.cursor()
 local fs = require "nixio.fs"
 local sys = require "luci.sys"
 local sid = arg[1]
-
-local function isKcptun(file)
-	if not fs.access(file, "rwx", "rx", "rx") then
-		fs.chmod(file, 755)
-	end
-
-	local str = sys.exec(file .. " -v | awk '{printf $1}'")
-	return (str:lower() == "kcptun")
-end
-
 local server_table = {}
 local arp_table = luci.ip.neighbors() or {}
 local encrypt_methods = {
@@ -81,31 +71,5 @@ o.rmempty = false
 
 o = s:option(Flag, "fast_open", translate("TCP Fast Open"))
 o.rmempty = false
-
-kcp_enable = s:option(Flag, "kcp_enable", translate("KcpTun Enable"), translate("bin:/usr/bin/ss-kcptun"))
-kcp_enable.rmempty = false
-
-o = s:option(Value, "kcp_port", translate("KcpTun Port"))
-o.datatype = "port"
-o.default = 4000
-function o.validate(self, value, section)
-	local kcp_file = "/usr/bin/ss-kcptun"
-	local enable = kcp_enable:formvalue(section) or kcp_enable.disabled
-	if enable == kcp_enable.enabled then
-		if not fs.access(kcp_file) then
-			return nil, translate("/usr/bin/ss-kcptun not found")
-		elseif not isKcptun(kcp_file) then
-			return nil, translate("/usr/bin/ss-kcptun is not a Kcptun executable file")
-		end
-	end
-
-	return value
-end
-
-o = s:option(Value, "kcp_password", translate("KcpTun Password"))
-o.password = true
-
-o = s:option(Value, "kcp_param", translate("KcpTun Params"))
-o.default = ""
 
 return m
