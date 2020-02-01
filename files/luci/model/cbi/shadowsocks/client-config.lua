@@ -1,7 +1,7 @@
 -- Copyright (C) 2017 yushi studio <ywb94@qq.com> github.com/ywb94
 -- Licensed to the public under the GNU General Public License v3.
 
-local m, s, o, kcp_enable
+local m, s, o
 local shadowsocks = "shadowsocks"
 local uci = luci.model.uci.cursor()
 local fs = require "nixio.fs"

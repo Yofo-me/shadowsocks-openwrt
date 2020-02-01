@@ -1,7 +1,7 @@
 -- Copyright (C) 2017 yushi studio <ywb94@qq.com> github.com/ywb94
 -- Licensed to the public under the GNU General Public License v3.
 
-local m, s, sec, o, kcp_enable
+local m, s, sec, o
 local shadowsocks = "shadowsocks"
 local uci = luci.model.uci.cursor()
 
@@ -75,11 +75,6 @@ function o.cfgvalue(...)
 end
 
 o = sec:option(DummyValue, "encrypt_method", translate("Encrypt Method"))
-function o.cfgvalue(...)
-	return Value.cfgvalue(...) or "?"
-end
-
-o = sec:option(DummyValue, "kcp_enable", translate("KcpTun"))
 function o.cfgvalue(...)
 	return Value.cfgvalue(...) or "?"
 end
