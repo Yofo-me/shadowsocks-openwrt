@@ -265,6 +265,7 @@ rules() {
 }
 
 start() {
+	mkdir -p /tmp/dnsmasq.d
 	if [ $(uci_get_by_type global gfw_enable) = "gfw" ]; then
 		if [ ! -f "/tmp/dnsmasq.d/shadowsocks.conf" ]; then
 			echo "server=/#/127.0.0.1#5353" > /tmp/dnsmasq.d/shadowsocks.conf
